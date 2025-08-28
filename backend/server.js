@@ -15,6 +15,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // <-- ADD THIS LINE
 app.use(express.json()); // Parse JSON bodies
 
 // Routes
