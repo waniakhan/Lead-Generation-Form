@@ -7,14 +7,14 @@ const leadsRoute = require("./routes/lead");
 const app = express();
 
 // Middleware
-const allowedOrigins = ["https://lead-generation-form-nu.vercel.app"];
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
-}));
+const corsOptions = {
+  origin: "https://lead-generation-form-nu.vercel.app", // your frontend URL
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+};
 
-app.use(bodyParser.json());
+app.use(cors(corsOptions));
+
 
 // Routes
 app.use("/api/leads", leadsRoute);
