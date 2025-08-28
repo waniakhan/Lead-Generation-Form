@@ -39,10 +39,10 @@ function App() {
     };
 
     try {
-      const response = await fetch("https://leadform-oru9dgdgf-waniakhans-projects.vercel.app/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
 
       if (!response.ok) throw new Error("Failed to save lead.");
