@@ -1,20 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const leadsRoute = require("./routes/lead");
 
 const app = express();
 
-// Middleware
+// CORS options
 const corsOptions = {
-  origin: "https://lead-generation-form-nu.vercel.app", // your frontend URL
+  origin: "https://lead-generation-form-nu.vercel.app",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
-
+app.use(express.json()); // Parse JSON bodies
 
 // Routes
 app.use("/api/leads", leadsRoute);
