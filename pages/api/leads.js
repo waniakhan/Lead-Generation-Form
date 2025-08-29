@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import nodemailer from 'nodemailer';
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -56,10 +57,27 @@ export default async function handler(req, res) {
       await lead.save();
       console.log("Lead saved:", req.body);
 
-      res.status(201).json({ message: 'Lead saved successfully' });
+      // --- Nodemailer Config ---
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,  // e.g. hafizawania654@gmail.com
+          pass: process.env.EMAIL_PASS,  // 16-digit App password
+        },
+      });
+
+      // --- Send Email ---
+      await transporter.sendMail({
+        from: `"Lead Generator" <${process.env.EMAIL_USER}>`,
+        to: "missshabana943@gmail.com",  // 👈 Boss ki email
+        subject: "New Lead Received",
+        text: JSON.stringify(req.body, null, 2),
+      });
+
+      res.status(201).json({ message: '✅ Lead saved & email sent' });
     } catch (err) {
-      console.error("Error saving lead:", err);
-      res.status(500).json({ message: 'Failed to save lead' });
+      console.error("❌ Error in lead API:", err);
+      res.status(500).json({ message: 'Failed to process lead', error: err.message });
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
