@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
-import { NextResponse } from 'next/server';
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -30,17 +29,21 @@ const LeadSchema = new mongoose.Schema({
 
 const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
 
-export async function GET(req) {
+export default async function handler(req, res) {
   // Cron secret check
-  if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new NextResponse('Unauthorized', { status: 401 });
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ message: 'Method not allowed' });
   }
 
   try {
     await dbConnect();
     const leads = await Lead.find({});
 
-    if (!leads.length) return NextResponse.json({ message: 'No leads today' });
+    if (!leads.length) return res.status(200).json({ message: 'No leads today' });
 
     const headers = ['Name', 'CNIC', 'Mobile', 'City', 'Income', 'Products'];
     const rows = leads.map(l => [l.name, l.cnic, l.mobile, l.city, l.income, l.products]);
@@ -56,15 +59,15 @@ export async function GET(req) {
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: 'boss@example.com', // yahan apna boss ka email daalo
+      to: 'boss@example.com',
       subject: 'Daily Leads Report',
       text: 'Attached is the daily leads report.',
       attachments: [{ filename: 'leads.csv', content: csv }],
     });
 
-    return NextResponse.json({ message: 'Daily leads sent!' });
+    res.status(200).json({ message: 'Daily leads sent!' });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ message: 'Failed to send leads', error: err }, { status: 500 });
+    console.error('Error sending daily leads:', err);
+    res.status(500).json({ message: 'Failed to send leads', error: err.message });
   }
 }
