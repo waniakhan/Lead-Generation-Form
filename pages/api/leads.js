@@ -1,6 +1,4 @@
 import mongoose from 'mongoose';
-import { Parser } from 'json2csv';
-import nodemailer from 'nodemailer';
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -39,7 +37,6 @@ const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
 
 // API handler
 export default async function handler(req, res) {
-  // Temporary CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -58,44 +55,7 @@ export default async function handler(req, res) {
       await lead.save();
       console.log("Lead saved:", req.body);
 
-      // ✅ instead of JSON email → generate full report
-      const leads = await Lead.find().lean();
-      const fields = ["timestamp", "name", "cnic", "mobile", "city", "income", "products"];
-      const parser = new Parser({ fields });
-      const csv = parser.parse(leads.map(l => ({
-        timestamp: l.createdAt,
-        name: l.name,
-        cnic: l.cnic,
-        mobile: l.mobile,
-        city: l.city,
-        income: l.income,
-        products: l.products,
-      })));
-
-      // --- Nodemailer Config ---
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      // --- Send Report Email ---
-      await transporter.sendMail({
-        from: `"Lead Generator" <${process.env.EMAIL_USER}>`,
-        to: "missshabana943@gmail.com", // boss ki email
-        subject: "📊 Lead Report",
-        text: "Attached is the latest lead report.",
-        attachments: [
-          {
-            filename: "leads-report.csv",
-            content: csv,
-          },
-        ],
-      });
-
-      res.status(201).json({ message: '✅ Lead saved & report email sent' });
+      res.status(201).json({ message: '✅ Lead saved successfully' });
     } catch (err) {
       console.error("❌ Error in lead API:", err);
       res.status(500).json({ message: 'Failed to process lead', error: err.message });
