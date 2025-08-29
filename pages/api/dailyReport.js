@@ -84,7 +84,7 @@ export default async function handler(req, res) {
     // Mail bhejo
     await transporter.sendMail({
       from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
-      to: "missshabana943@gmail.com", // 👈 Boss ki email
+      to: "missshabana943@gmail.com, HarisShakir@faysalbank.com, UmairMohsin@faysalbank.com", // 👈 Boss ki email
       subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
       text: "Attached is the daily leads report.",
       attachments: [
