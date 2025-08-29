@@ -1,73 +1,72 @@
-import mongoose from 'mongoose';
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
+import mongoose from "mongoose";
 
+// --- MongoDB connection ---
 const MONGO_URI = process.env.MONGO_URI;
 
-let cached = global.mongoose;
-if (!cached) cached = global.mongoose = { conn: null, promise: null };
-
-async function dbConnect() {
-  if (cached.conn) return cached.conn;
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }).then((mongoose) => mongoose);
-  }
-  cached.conn = await cached.promise;
-  return cached.conn;
+if (!MONGO_URI) {
+  throw new Error("❌ MONGO_URI is not defined in Vercel environment variables");
 }
 
-const LeadSchema = new mongoose.Schema({
+if (!global.mongoose) {
+  global.mongoose = { conn: null, promise: null };
+}
+
+async function dbConnect() {
+  if (global.mongoose.conn) return global.mongoose.conn;
+
+  if (!global.mongoose.promise) {
+    global.mongoose.promise = mongoose
+      .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then((mongoose) => mongoose);
+  }
+
+  global.mongoose.conn = await global.mongoose.promise;
+  return global.mongoose.conn;
+}
+
+// --- Schema ---
+const leadSchema = new mongoose.Schema({
   name: String,
   cnic: String,
   mobile: String,
   city: String,
   income: String,
   products: String,
-}, { timestamps: true });
+});
+const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
 
-const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
-
+// --- API Handler ---
 export default async function handler(req, res) {
-  // Cron secret check
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+  if (req.method === "POST") {
+    try {
+      await dbConnect();
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
+      const lead = new Lead(req.body);
+      await lead.save();
 
-  try {
-    await dbConnect();
-    const leads = await Lead.find({});
+      // --- Nodemailer Config ---
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS, // Gmail App Password (not your Gmail login password!)
+        },
+      });
 
-    if (!leads.length) return res.status(200).json({ message: 'No leads today' });
+      await transporter.sendMail({
+        from: `"Lead Generator" <${process.env.EMAIL_USER}>`,
+        to: process.env.EMAIL_USER, // apne email pe bhej raha hai
+        subject: "New Lead Received",
+        text: JSON.stringify(req.body, null, 2),
+      });
 
-    const headers = ['Name', 'CNIC', 'Mobile', 'City', 'Income', 'Products'];
-    const rows = leads.map(l => [l.name, l.cnic, l.mobile, l.city, l.income, l.products]);
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: 'boss@example.com',
-      subject: 'Daily Leads Report',
-      text: 'Attached is the daily leads report.',
-      attachments: [{ filename: 'leads.csv', content: csv }],
-    });
-
-    res.status(200).json({ message: 'Daily leads sent!' });
-  } catch (err) {
-    console.error('Error sending daily leads:', err);
-    res.status(500).json({ message: 'Failed to send leads', error: err.message });
+      return res.status(200).json({ message: "✅ Lead saved & email sent" });
+    } catch (err) {
+      console.error("❌ Error in API:", err);
+      return res.status(500).json({ message: "Failed to send leads", error: err.message });
+    }
+  } else {
+    return res.status(405).json({ message: "Method not allowed" });
   }
 }
