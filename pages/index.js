@@ -35,6 +35,7 @@ function Home() {
     };
 
     // Handler for form submission.
+    // Handler for form submission.
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -50,7 +51,7 @@ function Home() {
         };
 
         try {
-            // Use the full Vercel API URL
+            // 1. pehle lead save karo
             const response = await fetch('https://my-form-app-beta.vercel.app/api/leads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -59,8 +60,14 @@ function Home() {
 
             if (!response.ok) throw new Error("Failed to save lead.");
 
-            showMessage("✅ Thanks! Your lead has been saved.", "success");
+            // 2. phir report API ko bhi call kar do
+            await fetch('https://my-form-app-beta.vercel.app/api/dailyReport', {
+                method: 'GET',
+            });
 
+            showMessage("✅ Thanks! Your lead has been saved & report sent.", "success");
+
+            // form reset
             setForm({
                 name: "",
                 cnic: "",
@@ -69,6 +76,7 @@ function Home() {
                 income: "",
                 products: "",
             });
+
         } catch (err) {
             console.error(err);
             showMessage("Something went wrong. Please try again.", "error");
@@ -76,6 +84,7 @@ function Home() {
             setSubmitting(false);
         }
     };
+
 
 
     // SVG for check circle icon
