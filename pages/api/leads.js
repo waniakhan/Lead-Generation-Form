@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Parser } from 'json2csv';
 import nodemailer from 'nodemailer';
 
 const MONGO_URI = process.env.MONGO_URI;
@@ -57,24 +58,44 @@ export default async function handler(req, res) {
       await lead.save();
       console.log("Lead saved:", req.body);
 
+      // ✅ instead of JSON email → generate full report
+      const leads = await Lead.find().lean();
+      const fields = ["timestamp", "name", "cnic", "mobile", "city", "income", "products"];
+      const parser = new Parser({ fields });
+      const csv = parser.parse(leads.map(l => ({
+        timestamp: l.createdAt,
+        name: l.name,
+        cnic: l.cnic,
+        mobile: l.mobile,
+        city: l.city,
+        income: l.income,
+        products: l.products,
+      })));
+
       // --- Nodemailer Config ---
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: process.env.EMAIL_USER,  // e.g. hafizawania654@gmail.com
-          pass: process.env.EMAIL_PASS,  // 16-digit App password
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
         },
       });
 
-      // --- Send Email ---
+      // --- Send Report Email ---
       await transporter.sendMail({
         from: `"Lead Generator" <${process.env.EMAIL_USER}>`,
-        to: "missshabana943@gmail.com",  // 👈 Boss ki email
-        subject: "New Lead Received",
-        text: JSON.stringify(req.body, null, 2),
+        to: "missshabana943@gmail.com", // boss ki email
+        subject: "📊 Lead Report",
+        text: "Attached is the latest lead report.",
+        attachments: [
+          {
+            filename: "leads-report.csv",
+            content: csv,
+          },
+        ],
       });
 
-      res.status(201).json({ message: '✅ Lead saved & email sent' });
+      res.status(201).json({ message: '✅ Lead saved & report email sent' });
     } catch (err) {
       console.error("❌ Error in lead API:", err);
       res.status(500).json({ message: 'Failed to process lead', error: err.message });
