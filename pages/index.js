@@ -51,7 +51,7 @@ function Home() {
         };
 
         try {
-            // 1. pehle lead save karo
+            // 1. Sirf lead save karo
             const response = await fetch('https://my-form-app-beta.vercel.app/api/leads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -60,12 +60,7 @@ function Home() {
 
             if (!response.ok) throw new Error("Failed to save lead.");
 
-            // 2. phir report API ko bhi call kar do
-            await fetch('https://my-form-app-beta.vercel.app/api/dailyReport', {
-                method: 'GET',
-            });
-
-            showMessage("✅ Thanks! Your lead has been saved & report sent.", "success");
+            showMessage("✅ Thanks! Your lead has been saved.", "success");
 
             // form reset
             setForm({
@@ -84,6 +79,7 @@ function Home() {
             setSubmitting(false);
         }
     };
+
 
 
 
