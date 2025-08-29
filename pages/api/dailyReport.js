@@ -21,7 +21,7 @@ async function dbConnect() {
 }
 
 // --- Schema ---
-const leadSchema = new mongoose.Schema(
+const LeadSchema = new mongoose.Schema(
   {
     name: String,
     cnic: String,
@@ -30,10 +30,10 @@ const leadSchema = new mongoose.Schema(
     income: String,
     products: String,
   },
-  { timestamps: true }
+  { timestamps: true } // 👈 createdAt & updatedAt automatically add ho jayenge
 );
 
-const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+const Lead = mongoose.models.Lead || mongoose.model("Lead", LeadSchema);
 
 // --- API Handler ---
 export default async function handler(req, res) {
@@ -44,17 +44,21 @@ export default async function handler(req, res) {
   try {
     await dbConnect();
 
-    // filter -> last 4 days
+    // 🔎 Last 4 days ka filter
     const fourDaysAgo = new Date();
     fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
 
-    const leads = await Lead.find({ createdAt: { $gte: fourDaysAgo } }).lean();
+    // Agar sirf last 4 days chahiye:
+    // const leads = await Lead.find({ createdAt: { $gte: fourDaysAgo } }).lean();
 
-    if (leads.length === 0) {
-      return res.status(200).json({ message: "No leads found in last 4 days" });
+    // ⚡ Abhi sabhi leads laane ke liye:
+    const leads = await Lead.find().lean();
+
+    if (!leads.length) {
+      return res.status(200).json({ message: "No leads found" });
     }
 
-    // Add readable timestamp
+    // Date readable bana do
     const leadsWithDate = leads.map((l) => ({
       ...l,
       createdAt: new Date(l.createdAt).toLocaleString("en-GB", {
@@ -62,13 +66,13 @@ export default async function handler(req, res) {
       }),
     }));
 
-    // Convert to CSV
+    // CSV me convert karo
     const parser = new Parser({
       fields: ["name", "cnic", "mobile", "city", "income", "products", "createdAt"],
     });
     const csv = parser.parse(leadsWithDate);
 
-    // Nodemailer Config
+    // Nodemailer config
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -77,11 +81,12 @@ export default async function handler(req, res) {
       },
     });
 
+    // Mail bhejo
     await transporter.sendMail({
       from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
-      to: "missshabana943@gmail.com", // boss email
+      to: "missshabana943@gmail.com", // 👈 Boss ki email
       subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
-      text: "Attached is the daily leads report (last 4 days).",
+      text: "Attached is the daily leads report.",
       attachments: [
         {
           filename: `leads-${Date.now()}.csv`,

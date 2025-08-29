@@ -32,7 +32,7 @@ const LeadSchema = new mongoose.Schema({
   city: String,
   income: String,
   products: String,
-});
+}, { timestamps: true });
 
 const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
 
