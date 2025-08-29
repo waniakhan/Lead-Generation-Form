@@ -23,7 +23,6 @@ async function dbConnect() {
   return cached.conn;
 }
 
-// Lead Schema
 const LeadSchema = new mongoose.Schema({
   name: String,
   cnic: String,
@@ -35,7 +34,6 @@ const LeadSchema = new mongoose.Schema({
 
 const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
 
-// API handler
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
