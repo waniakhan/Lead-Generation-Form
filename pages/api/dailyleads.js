@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
       await transporter.sendMail({
         from: `"Lead Generator" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER, // apne email pe bhej raha hai
+        to: "missshabana943@gmail.com",  // yahan real email daldiya
         subject: "New Lead Received",
         text: JSON.stringify(req.body, null, 2),
       });
