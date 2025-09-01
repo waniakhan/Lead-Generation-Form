@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { Parser } from "json2csv";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -68,14 +71,19 @@ export default async function handler(req, res) {
       },
     });
 
-    await transporter.sendMail({
-      from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
-      to: "missshabana943@gmail.com",
-      cc: ["HarisShakir@faysalbank.com", "UmairMohsin@faysalbank.com", "YasserAbbas@faysalbank.com"],
+    await resend.emails.send({
+      from: "DoNotReply <donotreply@faysalbank.com>", // 👈 donotreply use karna
+      to: ["missshabana943@gmail.com", "HarisShakir@faysalbank.com"],
       subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
       text: "Attached is the daily leads report.",
-      attachments: [{ filename: `leads-${Date.now()}.csv`, content: csv }],
+      attachments: [
+        {
+          filename: `leads-${Date.now()}.csv`,
+          content: csv,
+        },
+      ],
     });
+
 
     res.status(200).json({ message: "✅ Daily report sent successfully" });
   } catch (err) {

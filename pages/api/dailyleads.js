@@ -1,81 +1,103 @@
-import nodemailer from "nodemailer";
 import mongoose from "mongoose";
+import { Parser } from "json2csv";
+import { Resend } from "resend";
 
-// --- MongoDB connection ---
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 const MONGO_URI = process.env.MONGO_URI;
 
-if (!MONGO_URI) {
-  throw new Error("❌ MONGO_URI is not defined in Vercel environment variables");
-}
-
-if (!global.mongoose) {
-  global.mongoose = { conn: null, promise: null };
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
 async function dbConnect() {
-  if (global.mongoose.conn) return global.mongoose.conn;
+  if (cached.conn) return cached.conn;
 
-  if (!global.mongoose.promise) {
-    global.mongoose.promise = mongoose
+  if (!cached.promise) {
+    cached.promise = mongoose
       .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
       .then((mongoose) => mongoose);
   }
 
-  global.mongoose.conn = await global.mongoose.promise;
-  return global.mongoose.conn;
+  cached.conn = await cached.promise;
+  return cached.conn;
 }
 
-// --- Schema ---
-const leadSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  cnic: String,
-  mobile: String,
-  city: String,
-  income: String,
-  products: String,
-  accountType: String, 
-});
-const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+const LeadSchema = new mongoose.Schema(
+  {
+    name: String,
+    email: String,
+    cnic: String,
+    mobile: String,
+    city: String,
+    income: String,
+    products: String,
+    accountType: String,
+  },
+  { timestamps: true }
+);
 
-// --- API Handler ---
+const Lead = mongoose.models.Lead || mongoose.model("Lead", LeadSchema);
+
 export default async function handler(req, res) {
-  if (req.method === "POST") {
-    try {
-      await dbConnect();
+  try {
+    await dbConnect();
 
-      const lead = new Lead(req.body);
-      await lead.save();
-
-      // --- Nodemailer Config ---
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS, // Gmail App Password (not your Gmail login password!)
-        },
-      });
-
-      await transporter.sendMail({
-        from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
-        to: "missshabana943@gmail.com",
-        cc: ["HarisShakir@faysalbank.com", "UmairMohsin@faysalbank.com", "YasserAbbas@faysalbank.com"],
-        subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
-        text: "Attached is the daily leads report.",
-        attachments: [
-          {
-            filename: `leads-${Date.now()}.csv`,
-            content: csv,
-          },
-        ],
-      });
-
-      return res.status(200).json({ message: "✅ Lead saved & email sent" });
-    } catch (err) {
-      console.error("❌ Error in API:", err);
-      return res.status(500).json({ message: "Failed to send leads", error: err.message });
+    const leads = await Lead.find().lean();
+    if (!leads.length) {
+      return res.status(200).json({ message: "⚠️ No leads found for report" });
     }
-  } else {
-    return res.status(405).json({ message: "Method not allowed" });
+
+    const fields = [
+      "timestamp",
+      "name",
+      "email",
+      "cnic",
+      "mobile",
+      "city",
+      "income",
+      "products",
+      "accountType",
+    ];
+    const parser = new Parser({ fields });
+
+    const csv = parser.parse(
+      leads.map((l) => ({
+        timestamp: l.createdAt,
+        name: l.name,
+        email: l.email,
+        cnic: l.cnic,
+        mobile: l.mobile,
+        city: l.city,
+        income: l.income,
+        products: l.products,
+        accountType: l.accountType,
+      }))
+    );
+
+    // ✅ Send using Resend
+    await resend.emails.send({
+      from: "DoNotReply <donotreply@faysalbank.com>",
+      to: [
+        "missshabana943@gmail.com",
+        "HarisShakir@faysalbank.com",
+      ],
+      subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
+      text: "Attached is the daily leads report.",
+      attachments: [
+        {
+          filename: `leads-${Date.now()}.csv`,
+          content: csv,
+        },
+      ],
+    });
+
+    res.status(200).json({ message: "✅ Daily report sent successfully" });
+  } catch (err) {
+    console.error("❌ Error sending report:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to send daily report", error: err.message });
   }
 }
