@@ -3,7 +3,6 @@ import { Parser } from "json2csv";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
 const MONGO_URI = process.env.MONGO_URI;
 
 let cached = global.mongoose;
@@ -13,13 +12,11 @@ if (!cached) {
 
 async function dbConnect() {
   if (cached.conn) return cached.conn;
-
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
       .then((mongoose) => mongoose);
   }
-
   cached.conn = await cached.promise;
   return cached.conn;
 }
@@ -76,19 +73,20 @@ export default async function handler(req, res) {
       }))
     );
 
-    // ✅ Send using Resend
+    // 🔑 Encode CSV to base64
+    const base64Csv = Buffer.from(csv).toString("base64");
+
+    // ✅ Send with encoding
     await resend.emails.send({
       from: "DoNotReply <donotreply@faysalbank.com>",
-      to: [
-        "missshabana943@gmail.com",
-        "HarisShakir@faysalbank.com",
-      ],
+      to: ["missshabana943@gmail.com", "HarisShakir@faysalbank.com"],
       subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
       text: "Attached is the daily leads report.",
       attachments: [
         {
           filename: `leads-${Date.now()}.csv`,
-          content: csv,
+          content: base64Csv,
+          encoding: "base64", // 👈 very important
         },
       ],
     });
