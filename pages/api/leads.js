@@ -23,39 +23,26 @@ async function dbConnect() {
   return cached.conn;
 }
 
-// 🟢 Schema with validations & unique constraints
-const LeadSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true,
-    unique: true,
-    match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
-  },
-  cnic: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-  },
-  mobile: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-  },
-  city: String,
-  income: String,
-  products: String,
+// 🟢 Schema with validations
+const LeadSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+    },
+    cnic: { type: String, required: true, trim: true },
+    mobile: { type: String, required: true, trim: true },
+    city: String,
+    income: String,
+    products: String,
     accountType: { type: String, required: true }, // 👈 New field
-}, { timestamps: true });
+  },
+  { timestamps: true }
+);
 
 const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
 
@@ -74,28 +61,31 @@ export default async function handler(req, res) {
       await dbConnect();
       console.log("DB Connected");
 
-      // 🟢 Duplicate check (extra safety)
-      const exists = await Lead.findOne({
-        $or: [
-          { name: req.body.name },
-          { email: req.body.email },
-          { cnic: req.body.cnic },
-          { mobile: req.body.mobile },
-        ]
-      });
+      const { name, email, cnic, mobile, city, income, products, accountType } = req.body;
 
-      if (exists) {
-        return res.status(400).json({ message: '❌ Duplicate entry: Name, Email, CNIC, or Mobile already exists' });
+      // 🟢 Check duplicates separately
+      if (await Lead.findOne({ name })) {
+        return res.status(400).json({ message: "Name already registered" });
+      }
+      if (await Lead.findOne({ email })) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+      if (await Lead.findOne({ cnic })) {
+        return res.status(400).json({ message: "CNIC already registered" });
+      }
+      if (await Lead.findOne({ mobile })) {
+        return res.status(400).json({ message: "Mobile already registered" });
       }
 
-      const lead = new Lead(req.body);
+      // Save new lead
+      const lead = new Lead({ name, email, cnic, mobile, city, income, products, accountType });
       await lead.save();
       console.log("Lead saved:", req.body);
 
-      res.status(201).json({ message: '✅ Lead saved successfully' });
+      return res.status(201).json({ message: '✅ Lead saved successfully' });
     } catch (err) {
       console.error("❌ Error in lead API:", err);
-      res.status(500).json({ message: 'Failed to process lead', error: err.message });
+      return res.status(500).json({ message: 'Failed to process lead', error: err.message });
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
