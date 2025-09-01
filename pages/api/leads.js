@@ -23,10 +23,34 @@ async function dbConnect() {
   return cached.conn;
 }
 
+// 🟢 Schema with validations & unique constraints
 const LeadSchema = new mongoose.Schema({
-  name: String,
-  cnic: String,
-  mobile: String,
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true,
+    unique: true,
+    match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+  },
+  cnic: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+  },
+  mobile: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+  },
   city: String,
   income: String,
   products: String,
@@ -48,6 +72,20 @@ export default async function handler(req, res) {
     try {
       await dbConnect();
       console.log("DB Connected");
+
+      // 🟢 Duplicate check (extra safety)
+      const exists = await Lead.findOne({
+        $or: [
+          { name: req.body.name },
+          { email: req.body.email },
+          { cnic: req.body.cnic },
+          { mobile: req.body.mobile },
+        ]
+      });
+
+      if (exists) {
+        return res.status(400).json({ message: '❌ Duplicate entry: Name, Email, CNIC, or Mobile already exists' });
+      }
 
       const lead = new Lead(req.body);
       await lead.save();

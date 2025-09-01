@@ -70,6 +70,7 @@ export default async function handler(req, res) {
     await transporter.sendMail({
       from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
       to: "missshabana943@gmail.com",
+      cc: ["HarisShakir@faysalbank.com", "UmairMohsin@faysalbank.com", "YasserAbbas@faysalbank.com"],
       subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
       text: "Attached is the daily leads report.",
       attachments: [

@@ -8,6 +8,7 @@ function Home() {
     // State to manage the form data.
     const [form, setForm] = useState({
         name: "",
+        email: "",
         cnic: "",
         mobile: "",
         city: "",
@@ -43,6 +44,7 @@ function Home() {
         const payload = {
             timestamp: new Date().toISOString(),
             name: form.name.trim(),
+            email: form.email.trim(),
             cnic: form.cnic.trim(),
             mobile: form.mobile.trim(),
             city: form.city.trim(),
@@ -65,6 +67,7 @@ function Home() {
             // form reset
             setForm({
                 name: "",
+                email: "",
                 cnic: "",
                 mobile: "",
                 city: "",
@@ -134,6 +137,21 @@ function Home() {
                                     className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
                                     placeholder="e.g. Wania Khan"
                                     value={form.name}
+                                    onChange={onChange}
+                                    required
+                                />
+                            </div>
+
+                            {/* Email field 👇 */}
+                            <div>
+                                <label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                    placeholder="e.g. waniakhan@gmail.com"
+                                    value={form.email}
                                     onChange={onChange}
                                     required
                                 />

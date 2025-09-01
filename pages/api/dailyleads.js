@@ -55,10 +55,17 @@ export default async function handler(req, res) {
       });
 
       await transporter.sendMail({
-        from: `"Lead Generator" <${process.env.EMAIL_USER}>`,
-        to: "missshabana943@gmail.com",  // yahan real email daldiya
-        subject: "New Lead Received",
-        text: JSON.stringify(req.body, null, 2),
+        from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
+        to: "missshabana943@gmail.com",
+        cc: ["HarisShakir@faysalbank.com", "UmairMohsin@faysalbank.com", "YasserAbbas@faysalbank.com"],
+        subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
+        text: "Attached is the daily leads report.",
+        attachments: [
+          {
+            filename: `leads-${Date.now()}.csv`,
+            content: csv,
+          },
+        ],
       });
 
       return res.status(200).json({ message: "✅ Lead saved & email sent" });
