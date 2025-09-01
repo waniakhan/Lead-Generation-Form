@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 
     // ✅ Send with encoding
     await resend.emails.send({
-      from: "DoNotReply <donotreply@faysalbank.com>",
+      from: "DoNotReply <onboarding@resend.dev>",
       to: ["missshabana943@gmail.com", "HarisShakir@faysalbank.com"],
       subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
       text: "Attached is the daily leads report.",
