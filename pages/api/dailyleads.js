@@ -28,11 +28,13 @@ async function dbConnect() {
 // --- Schema ---
 const leadSchema = new mongoose.Schema({
   name: String,
+  email: String,
   cnic: String,
   mobile: String,
   city: String,
   income: String,
   products: String,
+  accountType: String, 
 });
 const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
 

@@ -54,6 +54,7 @@ const LeadSchema = new mongoose.Schema({
   city: String,
   income: String,
   products: String,
+    accountType: { type: String, required: true }, // 👈 New field
 }, { timestamps: true });
 
 const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);

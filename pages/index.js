@@ -14,6 +14,7 @@ function Home() {
         city: "",
         income: "",
         products: "",
+        accountType: "", // 👈 Added
     });
 
     // State for the custom message box.
@@ -50,6 +51,7 @@ function Home() {
             city: form.city.trim(),
             income: form.income.trim(),
             products: form.products.trim(),
+            accountType: form.accountType.trim(), // 👈 Added
         };
 
         try {
@@ -73,6 +75,7 @@ function Home() {
                 city: "",
                 income: "",
                 products: "",
+                accountType: ""
             });
 
         } catch (err) {
@@ -237,6 +240,23 @@ function Home() {
                                     onChange={onChange}
                                 />
                             </div>
+                        </div>
+                        {/* Account Type dropdown 👇 */}
+                        <div className="field">
+                            <label htmlFor="accountType" className="text-sm font-medium text-gray-700">Account Type</label>
+                            <select
+                                id="accountType"
+                                name="accountType"
+                                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                                value={form.accountType}
+                                onChange={onChange}
+                                required
+                            >
+                                <option value="">Select Account Type</option>
+                                <option value="Savings">Savings</option>
+                                <option value="Current">Current</option>
+                                <option value="Business">Business</option>
+                            </select>
                         </div>
 
                         {/* Submit button */}
