@@ -255,7 +255,6 @@ function Home() {
                                 required
                             >
                                 <option value="">Select Account Type</option>
-                                <option value="Savings">Savings</option>
                                 <option value="Current">Current</option>
                                 <option value="Business">Business</option>
                             </select>
