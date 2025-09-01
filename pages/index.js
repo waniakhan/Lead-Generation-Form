@@ -51,22 +51,26 @@ function Home() {
             city: form.city.trim(),
             income: form.income.trim(),
             products: form.products.trim(),
-            accountType: form.accountType.trim(), // 👈 Added
+            accountType: form.accountType.trim(),
         };
 
         try {
-            // 1. Sirf lead save karo
             const response = await fetch('https://my-form-app-beta.vercel.app/api/leads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) throw new Error("Failed to save lead.");
+            const data = await response.json();
+
+            if (!response.ok) {
+                // 👇 Backend ka message use karo
+                throw new Error(data.message || "Failed to save lead.");
+            }
 
             showMessage("✅ Thanks! Your lead has been saved.", "success");
 
-            // form reset
+            // reset form
             setForm({
                 name: "",
                 email: "",
@@ -80,13 +84,11 @@ function Home() {
 
         } catch (err) {
             console.error(err);
-            showMessage("Something went wrong. Please try again.", "error");
+            showMessage(err.message, "error"); // 👈 ab customer ko sahi msg milega
         } finally {
             setSubmitting(false);
         }
     };
-
-
 
 
     // SVG for check circle icon
