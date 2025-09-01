@@ -58,6 +58,7 @@ export default async function handler(req, res) {
       "accountType",
     ];
     const parser = new Parser({ fields });
+
     const csv = parser.parse(
       leads.map((l) => ({
         timestamp: l.createdAt,
@@ -72,9 +73,10 @@ export default async function handler(req, res) {
       }))
     );
 
-    // Convert CSV to Base64
+    // 🔑 Encode CSV to base64
     const base64Csv = Buffer.from(csv).toString("base64");
 
+    // ✅ Send with encoding
     await resend.emails.send({
       from: "DoNotReply <donotreply@faysalbank.com>",
       to: ["missshabana943@gmail.com", "HarisShakir@faysalbank.com"],
@@ -83,7 +85,8 @@ export default async function handler(req, res) {
       attachments: [
         {
           filename: `leads-${Date.now()}.csv`,
-          content: base64Csv, // ✅ Base64 required
+          content: base64Csv,
+          encoding: "base64", // 👈 very important
         },
       ],
     });
@@ -91,6 +94,8 @@ export default async function handler(req, res) {
     res.status(200).json({ message: "✅ Daily report sent successfully" });
   } catch (err) {
     console.error("❌ Error sending report:", err);
-    res.status(500).json({ message: "Failed to send daily report", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to send daily report", error: err.message });
   }
 }
