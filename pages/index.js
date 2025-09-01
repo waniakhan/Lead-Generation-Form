@@ -138,7 +138,7 @@ function Home() {
                                     type="text"
                                     name="name"
                                     className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                    placeholder="e.g. Wania Khan"
+                                    placeholder="e.g. John Doe"
                                     value={form.name}
                                     onChange={onChange}
                                     required
@@ -153,7 +153,7 @@ function Home() {
                                     type="email"
                                     name="email"
                                     className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                                    placeholder="e.g. waniakhan@gmail.com"
+                                    placeholder="e.g. johndoe@gmail.com"
                                     value={form.email}
                                     onChange={onChange}
                                     required
