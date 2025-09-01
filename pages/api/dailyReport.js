@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Parser } from "json2csv";
-
+import nodemailer from "nodemailer";
 
 const MONGO_URI = process.env.MONGO_URI;
 
