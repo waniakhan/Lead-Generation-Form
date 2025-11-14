@@ -13,6 +13,7 @@ async function dbConnect() {
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(MONGO_URI, {
+        // Options from user's original code
         useNewUrlParser: true,
         useUnifiedTopology: true,
       })
@@ -23,13 +24,15 @@ async function dbConnect() {
   return cached.conn;
 }
 
-// 🟢 Schema with validations
+// 🟢 SCHEMA MODIFIED to align with the current form fields and remove unnecessary 'required' flags
 const LeadSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    email: {
+    
+    // Email is no longer required as it was removed from the frontend form.
+    email: { 
       type: String,
-      required: true,
+      required: false, // <-- CRITICAL FIX: No longer required
       trim: true,
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
@@ -37,9 +40,10 @@ const LeadSchema = new mongoose.Schema(
     cnic: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, trim: true },
     city: String,
-    income: String,
-    products: String,
-    accountType: { type: String, required: true }, // 👈 New field
+
+    // 🟢 Mapped fields to match the frontend: 'product' and 'intent'
+    product: String, 
+    intent: String, 
   },
   { timestamps: true }
 );
@@ -61,14 +65,12 @@ export default async function handler(req, res) {
       await dbConnect();
       console.log("DB Connected");
 
-      const { name, email, cnic, mobile, city, income, products, accountType } = req.body;
+      // 🟢 Destructure updated fields that match the frontend
+      const { name, cnic, mobile, city, product, intent } = req.body; 
 
-      // 🟢 Check duplicates separately
+      // Check for duplication (removed the email check)
       if (await Lead.findOne({ name })) {
-        return res.status(400).json({ message: "Name already registered" });
-      }
-      if (await Lead.findOne({ email })) {
-        return res.status(400).json({ message: "Email already registered" });
+         return res.status(400).json({ message: "Name might already be registered. Please check details." });
       }
       if (await Lead.findOne({ cnic })) {
         return res.status(400).json({ message: "CNIC already registered" });
@@ -78,14 +80,20 @@ export default async function handler(req, res) {
       }
 
       // Save new lead
-      const lead = new Lead({ name, email, cnic, mobile, city, income, products, accountType });
+      // 🟢 Saving the fields sent by the frontend
+      const lead = new Lead({ name, cnic, mobile, city, product, intent });
       await lead.save();
       console.log("Lead saved:", req.body);
 
       return res.status(201).json({ message: '✅ Lead saved successfully' });
     } catch (err) {
       console.error("❌ Error in lead API:", err);
-      return res.status(500).json({ message: 'Failed to process lead', error: err.message });
+      // Added check for Mongoose Validation error
+      if (err.name === 'ValidationError') {
+        const errors = Object.values(err.errors).map(val => val.message).join('; ');
+        return res.status(400).json({ message: `Validation failed: ${errors}` });
+      }
+      return res.status(500).json({ message: 'Failed to process lead due to internal server error.', error: err.message });
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
