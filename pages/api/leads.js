@@ -68,53 +68,6 @@ export default async function handler(req, res) {
       await lead.save();
       console.log("Lead saved:", req.body);
 
-      // -------------------- CSV GENERATION & EMAIL --------------------
-      const leads = await Lead.find().lean();
-      if (leads.length) {
-        const fields = ["timestamp","name","cnic","mobile","city","intent","product"];
-        const parser = new Parser({ fields });
-        const csv = parser.parse(
-          leads.map((l) => ({
-            timestamp: l.createdAt,
-            name: l.name,
-            cnic: l.cnic,
-            mobile: l.mobile,
-            city: l.city,
-            intent: l.intent,
-            product: l.product,
-          }))
-        );
-
-        const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-            user: EMAIL_USER,
-            pass: EMAIL_PASS,
-          },
-        });
-
-        await transporter.sendMail({
-          from: `"Daily Leads Report" <${EMAIL_USER}>`,
-          to: "salmanmalik@faysalbank.com",
-          cc: [
-            "MAqibAslam@faysalbank.com",
-            "UzmaRauf@faysalbank.com",
-            "Khaldoonaslam@faysalbank.com",
-            "HarisShakir@faysalbank.com",
-          ],
-          subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
-          text: "Attached is the daily leads report.",
-          attachments: [
-            {
-              filename: `leads-${Date.now()}.csv`,
-              content: csv,
-            },
-          ],
-        });
-        console.log("✅ Daily report sent via Gmail SMTP");
-      }
-      // ------------------------------------------------------------------
-
       return res.status(201).json({ message: '✅ Lead saved successfully' });
     } catch (err) {
       console.error("❌ Error in lead API:", err);
