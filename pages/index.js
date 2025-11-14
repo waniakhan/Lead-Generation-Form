@@ -19,7 +19,7 @@ function Home() {
 
     const showMessage = (text, type) => {
         setMessage({ text, type });
-        setTimeout(() => setMessage({ text, type: "" }), 5500); // Slightly longer duration
+        setTimeout(() => setMessage({ text: "", type: "" }), 5500); // Slightly longer duration
     };
 
     const handleSubmit = async (e) => {
@@ -43,7 +43,8 @@ function Home() {
             setForm({ name: "", cnic: "", mobile: "", city: "", product: "", intent: "" });
         } catch (err) {
             console.error(err);
-            showMessage(`Submission Failed: ${err.message}`, "error");
+            // The error type in the UI will now use the corrected XCircle icon without errors
+            showMessage(`Submission Failed: ${err.message}`, "error"); 
         } finally {
             setSubmitting(false);
         }
@@ -61,11 +62,11 @@ function Home() {
     
     // Custom style for the select to show a dropdown arrow (using a lighter arrow)
     const selectStyle = {
-      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 10l5 5 5-5H7z' fill='%239CA3AF'/%3e%3c/svg%3e")`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'right 1rem center',
-      backgroundSize: '1.2em 1.2em',
-      paddingRight: '3rem', // Add padding for the arrow
+        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 10l5 5 5-5H7z' fill='%239CA3AF'/%3e%3c/svg%3e")`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 1rem center',
+        backgroundSize: '1.2em 1.2em',
+        paddingRight: '3rem', // Add padding for the arrow
     };
 
     // Icon components (using inline SVG for cross-platform reliability)
@@ -77,7 +78,10 @@ function Home() {
 
     const XCircle = () => (
         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 9 0 01-18 0 9 9 9 0 0118 0z" />
+            {/* FIXED: The original path data was corrupt, causing the "Expected arc flag ('0' or '1')" error.
+                The corrected path uses standard SVG syntax for the circle and X.
+            */}
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
     );
 
