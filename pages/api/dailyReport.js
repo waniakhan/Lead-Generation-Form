@@ -59,23 +59,27 @@ export default async function handler(req, res) {
         accountType: l.accountType,
       }))
     );
-
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.office365.com",
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: "HWaniaKhan@outlook.com",
+        pass: "lnpizoudyvjegcsm"
       },
     });
 
     await transporter.sendMail({
       from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
-      to: "missshabana943@gmail.com",
-      cc: ["UmairMohsin@faysalbank.com", "YasserAbbas@faysalbank.com"],
+      to: "salmanmalik@faysalbank.com",          // jisko send karna hai
+      cc: ["MAqibAslam@faysalbank.com", "UzmaRauf@faysalbank.com", "Khaldoonaslam@faysalbank.com", "HarisShakir@faysalbank.com"],           // jitne add karna chaho
       subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
       text: "Attached is the daily leads report.",
-      attachments: [{ filename: `leads-${Date.now()}.csv`, content: csv }],
+      attachments: [
+        { filename: `leads-${Date.now()}.csv`, content: csv }
+      ]
     });
+
 
     res.status(200).json({ message: "✅ Daily report sent successfully" });
   } catch (err) {
