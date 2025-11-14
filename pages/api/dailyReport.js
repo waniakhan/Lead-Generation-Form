@@ -65,7 +65,7 @@ export default async function handler(req, res) {
       secure: false,
       auth: {
         user: "HWaniaKhan@outlook.com",
-        pass: "lnpizoudyvjegcsm"
+        pass: "ksvjegiclnxpinvn"
       },
     });
 
