@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: RESEND_DOMAIN,
+        from: "HWaniaKhan@resendmail.com",
         to: ["salmanmalik@faysalbank.com"],   // jisko bhejna hai
         cc: ["MAqibAslam@faysalbank.com","UzmaRauf@faysalbank.com","Khaldoonaslam@faysalbank.com","HarisShakir@faysalbank.com"],
         subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
