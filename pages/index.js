@@ -168,13 +168,13 @@ function Home() {
                         {/* Mobile Number Input */}
                         <div>
                             <label htmlFor="mobile" className="text-sm font-semibold text-gray-700 mb-1 block">Mobile Number</label>
-                            <input id="mobile" type="tel" name="mobile" value={form.mobile} onChange={onChange} placeholder="03XXXXXXXXX" className={inputClass} required />
+                            <input id="mobile" type="tel" name="mobile" value={form.mobile} onChange={onChange} placeholder="03XXXXXXXXX" className={inputClass} required pattern="\d{11}" />
                         </div>
                         
                         {/* CNIC Input */}
                         <div>
                             <label htmlFor="cnic" className="text-sm font-semibold text-gray-700 mb-1 block">CNIC (13-digit)</label>
-                            <input id="cnic" type="text" name="cnic" value={form.cnic} onChange={onChange} placeholder="XXXXXXXXXXXXX" className={inputClass} required />
+                            <input id="cnic" type="text" name="cnic" value={form.cnic} onChange={onChange} placeholder="XXXXXXXXXXXXX" className={inputClass} required pattern="\d{13}" />
                         </div>
 
                         {/* City Input */}
