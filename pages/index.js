@@ -53,12 +53,11 @@ function Home() {
     const primaryColor = '#1f4aa0'; // Deep Blue (used for inputs/header)
     const secondaryColor = '#009994'; // Teal/Cyan color used ONLY for the Submit button
 
-    // Tailwind input class for reuse - REMOVED ALL BLUE/HOVER EFFECTS
-    // Using focus:border-gray-400 and focus:ring-1 focus:ring-gray-300 for subtle focus indication
-    const inputClass = "mt-1 block w-full rounded-xl border-gray-300 shadow-inner p-3 transition-all duration-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-300 focus:outline-none"; 
+    // Tailwind input class for reuse - Reduced vertical padding (p-3 -> py-2 px-3)
+    const inputClass = "mt-1 block w-full rounded-xl border-gray-300 shadow-inner py-2 px-3 transition-all duration-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-300 focus:outline-none"; 
     
-    // Tailwind select class for reuse (for intent/product) - NO hover effects
-    const selectClass = "mt-1 block w-full rounded-xl border-2 shadow-lg p-3 text-gray-700 transition-all duration-300 appearance-none bg-white cursor-pointer";
+    // Tailwind select class for reuse (for intent/product) - Reduced vertical padding (p-3 -> py-2 px-3)
+    const selectClass = "mt-1 block w-full rounded-xl border-2 shadow-lg py-2 px-3 text-gray-700 transition-all duration-300 appearance-none bg-white cursor-pointer";
     
     // Custom style for the select to show a dropdown arrow (using a lighter arrow)
     const selectStyle = {
@@ -87,23 +86,24 @@ function Home() {
             <script src="https://cdn.tailwindcss.com"></script>
             
             <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
-                {/* Reduced container size from max-w-xl to max-w-lg and removed large borders */}
-                <div className="w-full max-w-lg mx-auto p-8 bg-white rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-3xl">
+                {/* Reduced container padding (p-8 -> p-6) */}
+                <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-3xl">
                     
-                    {/* Brand/Header Section (mb-8 changed to mb-6) */}
-                    <div className="text-center mb-6">
-                        {/* Logo enhanced: WIDER (w-64 h-24) to prevent stretching, NO shadow */}
-                        <img className="mx-auto w-35 h-24 mb-3" 
+                    {/* Brand/Header Section - Reduced margin (mb-6 -> mb-4) */}
+                    <div className="text-center mb-4">
+                        {/* Logo reduced in size (w-64 h-24 -> w-52 h-20) */}
+                        <img className="mx-auto w-35 h-20 mb-3" 
                              src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/vrjxgngilhvdzkwdxgr8" 
                              alt="Brand Logo" 
                              onError={(e) => (e.currentTarget.style.display = "none")} />
-                        <h1 className="text-4xl font-extrabold mb-1" style={{ color: primaryColor }}>
+                        {/* Header text size reduced (text-4xl -> text-3xl) */}
+                        <h1 className="text-3xl font-extrabold mb-1" style={{ color: primaryColor }}>
                             Quick Application Form
                         </h1>
                     </div>
 
-                    {/* Important Note Alert - TEXT UPDATED (Noor Card bolded, no asterisks) */}
-                    <div className="p-4 mb-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg shadow-inner">
+                    {/* Important Note Alert - Reduced margin (mb-6 -> mb-4) */}
+                    <div className="p-4 mb-4 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg shadow-inner">
                         <p className="font-semibold flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z" />
@@ -115,9 +115,9 @@ function Home() {
                         </p>
                     </div>
 
-                    {/* Submission Message */}
+                    {/* Submission Message - Reduced margin (mb-4 -> mb-3) */}
                     {message.text && (
-                        <div className={`p-4 mb-4 rounded-lg font-bold transition-opacity duration-500 flex items-center ${
+                        <div className={`p-3 mb-3 rounded-lg font-bold transition-opacity duration-500 flex items-center ${
                             message.type === 'success' 
                             ? 'bg-green-100 text-green-700 border border-green-300' 
                             : 'bg-red-100 text-red-700 border border-red-300'
@@ -127,10 +127,10 @@ function Home() {
                         </div>
                     )}
 
-                    {/* Form */}
-                    <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+                    {/* Form - Reduced gap (gap-6 -> gap-4) */}
+                    <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
                         
-                        {/* Intent Dropdown - Full Width - FOCUS COLOR REVERTED TO GRAY */}
+                        {/* Intent Dropdown */}
                         <div className="col-span-1 md:col-span-2">
                             <label htmlFor="intent" className="text-sm font-bold text-gray-700 mb-1 block">
                                 Want to avail a consumer finance product?
@@ -140,7 +140,6 @@ function Home() {
                                 name="intent"
                                 value={form.intent}
                                 onChange={onChange}
-                                // Updated focus to use gray colors
                                 className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
                                 style={selectStyle} 
                                 required
@@ -151,38 +150,39 @@ function Home() {
                             </select>
                         </div>
                         
-                        <div className="col-span-1 md:col-span-2 border-t border-gray-200 pt-4">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4">Personal Details</h2>
+                        {/* Personal Details Header - Reduced top padding and bottom margin */}
+                        <div className="col-span-1 md:col-span-2 border-t border-gray-200 pt-3">
+                            <h2 className="text-xl font-bold text-gray-800 mb-3">Personal Details</h2>
                         </div>
 
-                        {/* Name Input - FOCUS COLOR REVERTED TO GRAY */}
+                        {/* Name Input */}
                         <div>
                             <label htmlFor="name" className="text-sm font-semibold text-gray-700 mb-1 block">Customer Name</label>
                             <input id="name" type="text" name="name" value={form.name} onChange={onChange} placeholder="John Doe" className={inputClass} required />
                         </div>
                         
-                        {/* Mobile Number Input - FOCUS COLOR REVERTED TO GRAY */}
+                        {/* Mobile Number Input */}
                         <div>
                             <label htmlFor="mobile" className="text-sm font-semibold text-gray-700 mb-1 block">Mobile Number</label>
                             <input id="mobile" type="tel" name="mobile" value={form.mobile} onChange={onChange} placeholder="03XXXXXXXXX" className={inputClass} required />
                         </div>
                         
-                        {/* CNIC Input - FOCUS COLOR REVERTED TO GRAY */}
+                        {/* CNIC Input */}
                         <div>
                             <label htmlFor="cnic" className="text-sm font-semibold text-gray-700 mb-1 block">CNIC (13-digit)</label>
                             <input id="cnic" type="text" name="cnic" value={form.cnic} onChange={onChange} placeholder="XXXXXXXXXXXXX" className={inputClass} required />
                         </div>
 
-                        {/* City Input - FOCUS COLOR REVERTED TO GRAY */}
+                        {/* City Input */}
                         <div>
                             <label htmlFor="city" className="text-sm font-semibold text-gray-700 mb-1 block">City</label>
                             <input id="city" type="text" name="city" value={form.city} onChange={onChange} placeholder="e.g. Karachi, Lahore" className={inputClass} required />
                         </div>
                         
-                        {/* Product Dropdown - Appears conditionally - FOCUS COLOR REVERTED TO GRAY */}
+                        {/* Product Dropdown - Reduced top padding */}
                         {form.intent === "yes" && (
                             <div 
-                                className="col-span-1 md:col-span-2 transition-all duration-500 ease-in-out border-t border-gray-200 pt-4"
+                                className="col-span-1 md:col-span-2 transition-all duration-500 ease-in-out border-t border-gray-200 pt-3"
                             >
                                 <label htmlFor="product" className="text-sm font-bold text-gray-700 mb-1 block">
                                     Product Selection (Check Minimum Salary Requirements)
@@ -192,7 +192,6 @@ function Home() {
                                     name="product" 
                                     value={form.product} 
                                     onChange={onChange} 
-                                    // Updated focus to use gray colors
                                     className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
                                     style={selectStyle} 
                                     required={form.intent === "yes"}
@@ -207,13 +206,13 @@ function Home() {
                             </div>
                         )}
 
-                        {/* Submit Button - Remains Teal (#009994) */}
+                        {/* Submit Button - Reduced vertical padding (py-4 -> py-3) and top margin (mt-6 -> mt-4) */}
                         <div className="col-span-1 md:col-span-2">
                             <button 
                                 type="submit" 
                                 disabled={submitting}
                                 // Custom style for the submit button color
-                                className="w-full py-4 mt-6 text-white font-extrabold rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.01] shadow-xl disabled:bg-gray-400 disabled:shadow-none focus:ring-4 focus:ring-opacity-50"
+                                className="w-full py-3 mt-4 text-white font-extrabold rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.01] shadow-xl disabled:bg-gray-400 disabled:shadow-none focus:ring-4 focus:ring-opacity-50"
                                 style={{ 
                                     backgroundColor: submitting ? '#6B7280' : secondaryColor, 
                                     '--tw-ring-color': secondaryColor // Inject ring color for focus
