@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       }))
     );
 
-    // --- Send email via Resend API ---
+    // --- Resend API email ---
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "HWaniaKhan@outlook.com",
+        from: "Daily Leads <daily@resendmail.com>", // ✅ Resend default verified domain
         to: ["salmanmalik@faysalbank.com"],
         cc: ["MAqibAslam@faysalbank.com", "UzmaRauf@faysalbank.com", "Khaldoonaslam@faysalbank.com", "HarisShakir@faysalbank.com"],
         subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
@@ -73,10 +73,9 @@ export default async function handler(req, res) {
         attachments: [
           {
             name: `leads-${Date.now()}.csv`,
-            content: Buffer.from(csv).toString("base64"),
+            content: Buffer.from(csv).toString("base64"), // ✅ Base64 content
           },
         ],
-
       }),
     });
 
