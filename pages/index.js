@@ -93,7 +93,7 @@ function Home() {
                     {/* Brand/Header Section (mb-8 changed to mb-6) */}
                     <div className="text-center mb-6">
                         {/* Logo enhanced: WIDER (w-64 h-24) to prevent stretching, NO shadow */}
-                        <img className="mx-auto w-64 h-24 mb-3" 
+                        <img className="mx-auto w-35 h-24 mb-3" 
                              src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/vrjxgngilhvdzkwdxgr8" 
                              alt="Brand Logo" 
                              onError={(e) => (e.currentTarget.style.display = "none")} />
