@@ -73,9 +73,10 @@ export default async function handler(req, res) {
         attachments: [
           {
             name: `leads-${Date.now()}.csv`,
-            data: Buffer.from(csv).toString("base64"),
+            content: Buffer.from(csv).toString("base64"),
           },
         ],
+
       }),
     });
 
