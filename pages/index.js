@@ -1,311 +1,245 @@
 import { useState } from 'react';
 
-// The main App component which contains the form and the main page content.
 function Home() {
-    // State to handle the form submission state, showing "Submitting..." text.
     const [submitting, setSubmitting] = useState(false);
-
-    // State to manage the form data.
     const [form, setForm] = useState({
         name: "",
-        email: "",
         cnic: "",
         mobile: "",
         city: "",
-        income: "",
-        products: "",
-        accountType: "", // 👈 Added
+        product: "",
+        intent: "",
     });
+    const [message, setMessage] = useState({ text: "", type: "" });
 
-    // State for the custom message box.
-    const [message, setMessage] = useState({
-        text: "",
-        type: "", // 'success' or 'error'
-    });
-
-    // Handler for form input changes, updating the state dynamically.
     const onChange = (e) => {
         const { name, value } = e.target;
         setForm((f) => ({ ...f, [name]: value }));
     };
 
-    // Function to show a custom message box instead of the native alert().
     const showMessage = (text, type) => {
         setMessage({ text, type });
-        // Hide the message after 4 seconds.
-        setTimeout(() => setMessage({ text: "", type: "" }), 4000);
+        setTimeout(() => setMessage({ text, type: "" }), 5500); // Slightly longer duration
     };
 
-    // Handler for form submission.
-    // Handler for form submission.
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
 
-        const payload = {
-            timestamp: new Date().toISOString(),
-            name: form.name.trim(),
-            email: form.email.trim(),
-            cnic: form.cnic.trim(),
-            mobile: form.mobile.trim(),
-            city: form.city.trim(),
-            income: form.income.trim(),
-            products: form.products.trim(),
-            accountType: form.accountType.trim(),
-        };
+        // Remove the 'email' field entirely since it's no longer in the state
+        const payload = { timestamp: new Date().toISOString(), ...form };
 
         try {
+            // Note: I'm keeping your API call structure for functionality
             const response = await fetch('https://my-form-app-beta.vercel.app/api/leads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-
             const data = await response.json();
-
-            if (!response.ok) {
-                // 👇 Backend ka message use karo
-                throw new Error(data.message || "Failed to save lead.");
-            }
-
-            showMessage("✅ Thanks! Your lead has been saved.", "success");
-
-            // reset form
-            setForm({
-                name: "",
-                email: "",
-                cnic: "",
-                mobile: "",
-                city: "",
-                income: "",
-                products: "",
-                accountType: ""
-            });
-
+            if (!response.ok) throw new Error(data.message || "Failed to save lead. Please check your network.");
+            showMessage("Application Successful! We will contact you shortly.", "success");
+            // Clear form fields after success
+            setForm({ name: "", cnic: "", mobile: "", city: "", product: "", intent: "" });
         } catch (err) {
             console.error(err);
-            showMessage(err.message, "error"); // 👈 ab customer ko sahi msg milega
+            showMessage(`Submission Failed: ${err.message}`, "error");
         } finally {
             setSubmitting(false);
         }
     };
 
+    // Brand Colors
+    const primaryColor = '#1f4aa0'; // Deep Blue (used for inputs/header)
+    const secondaryColor = '#009994'; // Teal/Cyan color used ONLY for the Submit button
 
-    // SVG for check circle icon
-    const IconCheckCircle = () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-8.82" /><path d="M22 4L12 14.01l-3-3" /></svg>
+    // Tailwind input class for reuse - REMOVED ALL BLUE/HOVER EFFECTS
+    // Using focus:border-gray-400 and focus:ring-1 focus:ring-gray-300 for subtle focus indication
+    const inputClass = "mt-1 block w-full rounded-xl border-gray-300 shadow-inner p-3 transition-all duration-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-300 focus:outline-none"; 
+    
+    // Tailwind select class for reuse (for intent/product) - NO hover effects
+    const selectClass = "mt-1 block w-full rounded-xl border-2 shadow-lg p-3 text-gray-700 transition-all duration-300 appearance-none bg-white cursor-pointer";
+    
+    // Custom style for the select to show a dropdown arrow (using a lighter arrow)
+    const selectStyle = {
+      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 10l5 5 5-5H7z' fill='%239CA3AF'/%3e%3c/svg%3e")`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'right 1rem center',
+      backgroundSize: '1.2em 1.2em',
+      paddingRight: '3rem', // Add padding for the arrow
+    };
+
+    // Icon components (using inline SVG for cross-platform reliability)
+    const CheckCircle = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
     );
 
-    // SVG for alert triangle icon
-    const IconAlertTriangle = () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
-    );
-
-    // SVG for send icon
-    const IconSend = () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-send-horizontal"><path d="m3 3 3 9-3 9 19-9Z" /><path d="M6 12h16" /></svg>
+    const XCircle = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 9 0 01-18 0 9 9 9 0 0118 0z" />
+        </svg>
     );
 
     return (
         <div className="font-sans antialiased text-gray-800" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {/* Include the Tailwind CSS CDN link directly in the component's render method */}
-            <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-
-            {/* Main page content container */}
+            <script src="https://cdn.tailwindcss.com"></script>
+            
             <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
-                <div className="w-full max-w-xl mx-auto p-6 bg-white rounded-3xl shadow-2xl animate-scaleUp">
-                    {/* Form content section */}
+                {/* Reduced container size from max-w-xl to max-w-lg and removed large borders */}
+                <div className="w-full max-w-lg mx-auto p-8 bg-white rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-3xl">
+                    
+                    {/* Brand/Header Section (mb-8 changed to mb-6) */}
                     <div className="text-center mb-6">
-                        {/* Using a placeholder image with onError fallback */}
-                        <img
-                            className="mx-auto w-40 h-auto mb-4 rounded-full"
-                            src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/vrjxgngilhvdzkwdxgr8"
-                            alt="Brand Logo"
-                            onError={(e) => (e.currentTarget.style.display = "none")}
-                        />
-                        <h1 id="lead-title" className="text-3xl font-bold text-gray-900 mb-2" style={{ color: '#1f4aa0' }}>Apply Now!</h1>
-                        <p className="text-gray-500">
-                            Fill this form to get a quick call-back. It only takes a minute.
+                        {/* Logo enhanced: WIDER (w-64 h-24) to prevent stretching, NO shadow */}
+                        <img className="mx-auto w-64 h-24 mb-3" 
+                             src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/vrjxgngilhvdzkwdxgr8" 
+                             alt="Brand Logo" 
+                             onError={(e) => (e.currentTarget.style.display = "none")} />
+                        <h1 className="text-4xl font-extrabold mb-1" style={{ color: primaryColor }}>
+                            Quick Application Form
+                        </h1>
+                    </div>
+
+                    {/* Important Note Alert - TEXT UPDATED (Noor Card bolded, no asterisks) */}
+                    <div className="p-4 mb-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg shadow-inner">
+                        <p className="font-semibold flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Customer Notice
+                        </p>
+                        <p className="text-sm mt-1 ml-7">
+                            If you are already using a <strong className="font-extrabold">Noor Card</strong>, kindly <strong className="font-extrabold">exit this form</strong> to explore the best deals available in Digi Mall.
                         </p>
                     </div>
 
-                    {/* Form */}
-                    <form className="space-y-4" onSubmit={handleSubmit}>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {/* Name field */}
-                            <div className="field">
-                                <label htmlFor="name" className="text-sm font-medium text-gray-700">Complete Name</label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    name="name"
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                    placeholder="e.g. John Doe"
-                                    value={form.name}
-                                    onChange={onChange}
-                                    required
-                                />
-                            </div>
-
-                            {/* Email field 👇 */}
-                            <div>
-                                <label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                                    placeholder="e.g. johndoe@gmail.com"
-                                    value={form.email}
-                                    onChange={onChange}
-                                    required
-                                />
-                            </div>
-
-                            {/* CNIC field */}
-                            <div className="field">
-                                <label htmlFor="cnic" className="text-sm font-medium text-gray-700">CNIC</label>
-                                <input
-                                    id="cnic"
-                                    type="text"
-                                    name="cnic"
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                    placeholder="13-digit CNIC (no dashes)"
-                                    inputMode="numeric"
-                                    pattern="\d{13}"
-                                    title="Enter 13 digits without dashes"
-                                    value={form.cnic}
-                                    onChange={onChange}
-                                    required
-                                />
-                            </div>
-
-                            {/* Mobile number field */}
-                            <div className="field">
-                                <label htmlFor="mobile" className="text-sm font-medium text-gray-700">Mobile Number</label>
-                                <input
-                                    id="mobile"
-                                    type="tel"
-                                    name="mobile"
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                    placeholder="03XXXXXXXXX"
-                                    pattern="^0[0-9]{10}$"
-                                    title="Enter valid Pakistani mobile number (11 digits, starts with 0)"
-                                    value={form.mobile}
-                                    onChange={onChange}
-                                    required
-                                />
-                            </div>
-
-                            {/* City field */}
-                            <div className="field">
-                                <label htmlFor="city" className="text-sm font-medium text-gray-700">City</label>
-                                <input
-                                    id="city"
-                                    type="text"
-                                    name="city"
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                    placeholder="e.g. Karachi"
-                                    value={form.city}
-                                    onChange={onChange}
-                                    required
-                                />
-                            </div>
-
-                            {/* Income field */}
-                            <div className="field">
-                                <label htmlFor="income" className="text-sm font-medium text-gray-700">Income / Salary Per Month (PKR)</label>
-                                <input
-                                    id="income"
-                                    type="number"
-                                    name="income"
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                    placeholder="e.g. 85000"
-                                    min="0"
-                                    step="1000"
-                                    value={form.income}
-                                    onChange={onChange}
-                                    required
-                                />
-                            </div>
-
-                            {/* Products field (full width) */}
-                            <div className="field col-span-full">
-                                <label htmlFor="products" className="text-sm font-medium text-gray-700">Products Interested In</label>
-                                <textarea
-                                    id="products"
-                                    name="products"
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                    placeholder="Credit Card, Personal Loan, Auto Finance, etc."
-                                    rows={3}
-                                    value={form.products}
-                                    onChange={onChange}
-                                />
-                            </div>
+                    {/* Submission Message */}
+                    {message.text && (
+                        <div className={`p-4 mb-4 rounded-lg font-bold transition-opacity duration-500 flex items-center ${
+                            message.type === 'success' 
+                            ? 'bg-green-100 text-green-700 border border-green-300' 
+                            : 'bg-red-100 text-red-700 border border-red-300'
+                        }`}>
+                            {message.type === 'success' ? <CheckCircle /> : <XCircle />}
+                            <span>{message.text}</span>
                         </div>
-                        {/* Account Type dropdown 👇 */}
-                        <div className="field">
-                            <label htmlFor="accountType" className="text-sm font-medium text-gray-700">Account Type</label>
+                    )}
+
+                    {/* Form */}
+                    <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+                        
+                        {/* Intent Dropdown - Full Width - FOCUS COLOR REVERTED TO GRAY */}
+                        <div className="col-span-1 md:col-span-2">
+                            <label htmlFor="intent" className="text-sm font-bold text-gray-700 mb-1 block">
+                                Want to avail a consumer finance product?
+                            </label>
                             <select
-                                id="accountType"
-                                name="accountType"
-                                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
-                                value={form.accountType}
+                                id="intent"
+                                name="intent"
+                                value={form.intent}
                                 onChange={onChange}
+                                // Updated focus to use gray colors
+                                className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
+                                style={selectStyle} 
                                 required
                             >
-                                <option value="">Select Account Type</option>
-                                <option value="Current">Current</option>
-                                <option value="Business">Business</option>
+                                <option value="" disabled>-- Select --</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
                             </select>
                         </div>
+                        
+                        <div className="col-span-1 md:col-span-2 border-t border-gray-200 pt-4">
+                            <h2 className="text-xl font-bold text-gray-800 mb-4">Personal Details</h2>
+                        </div>
 
-                        {/* Submit button */}
-                        <button
-                            type="submit"
-                            className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-lg text-white font-bold transition-all duration-300 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:bg-opacity-70 disabled:cursor-not-allowed"
-                            style={{ backgroundColor: '#0e8f97', focusRingColor: '#0e8f97', focusRingOffsetColor: '#0e8f97' }}
-                            disabled={submitting}
-                        >
-                            {submitting ? (
-                                <>
-                                    {/* Inline SVG for a spinner animation */}
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.961l3-2.67z"></path>
-                                    </svg>
-                                    <span>Submitting...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <IconSend size={18} />
-                                    <span>Submit</span>
-                                </>
-                            )}
-                        </button>
+                        {/* Name Input - FOCUS COLOR REVERTED TO GRAY */}
+                        <div>
+                            <label htmlFor="name" className="text-sm font-semibold text-gray-700 mb-1 block">Customer Name</label>
+                            <input id="name" type="text" name="name" value={form.name} onChange={onChange} placeholder="John Doe" className={inputClass} required />
+                        </div>
+                        
+                        {/* Mobile Number Input - FOCUS COLOR REVERTED TO GRAY */}
+                        <div>
+                            <label htmlFor="mobile" className="text-sm font-semibold text-gray-700 mb-1 block">Mobile Number</label>
+                            <input id="mobile" type="tel" name="mobile" value={form.mobile} onChange={onChange} placeholder="03XXXXXXXXX" className={inputClass} required />
+                        </div>
+                        
+                        {/* CNIC Input - FOCUS COLOR REVERTED TO GRAY */}
+                        <div>
+                            <label htmlFor="cnic" className="text-sm font-semibold text-gray-700 mb-1 block">CNIC (13-digit)</label>
+                            <input id="cnic" type="text" name="cnic" value={form.cnic} onChange={onChange} placeholder="XXXXXXXXXXXXX" className={inputClass} required />
+                        </div>
 
-                        {/* Privacy statement */}
-                        <p className="text-center text-sm text-gray-400">
-                            <span role="img" aria-label="lock">🔒</span> We respect your privacy. No spam ever.
-                        </p>
+                        {/* City Input - FOCUS COLOR REVERTED TO GRAY */}
+                        <div>
+                            <label htmlFor="city" className="text-sm font-semibold text-gray-700 mb-1 block">City</label>
+                            <input id="city" type="text" name="city" value={form.city} onChange={onChange} placeholder="e.g. Karachi, Lahore" className={inputClass} required />
+                        </div>
+                        
+                        {/* Product Dropdown - Appears conditionally - FOCUS COLOR REVERTED TO GRAY */}
+                        {form.intent === "yes" && (
+                            <div 
+                                className="col-span-1 md:col-span-2 transition-all duration-500 ease-in-out border-t border-gray-200 pt-4"
+                            >
+                                <label htmlFor="product" className="text-sm font-bold text-gray-700 mb-1 block">
+                                    Product Selection (Check Minimum Salary Requirements)
+                                </label>
+                                <select 
+                                    id="product" 
+                                    name="product" 
+                                    value={form.product} 
+                                    onChange={onChange} 
+                                    // Updated focus to use gray colors
+                                    className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
+                                    style={selectStyle} 
+                                    required={form.intent === "yes"}
+                                >
+                                    <option value="" disabled>-- Select a Product to Proceed --</option>
+                                    <option value="Noor Card">💳 Noor Card (Min. Salary: PKR 40,000)</option>
+                                    <option value="Installment Personal Finance">💰 Installment Personal Finance (Min. Salary: PKR 50,000)</option>
+                                    <option value="Takmeel Finance">💸 Takmeel Finance (Min. Salary: PKR 50,000)</option>
+                                    <option value="Auto Finance">🚗 Auto Finance (Min. Salary: PKR 100,000)</option>
+                                    <option value="Home Finance">🏠 Home Finance (Min. Salary: PKR 100,000)</option>
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Submit Button - Remains Teal (#009994) */}
+                        <div className="col-span-1 md:col-span-2">
+                            <button 
+                                type="submit" 
+                                disabled={submitting}
+                                // Custom style for the submit button color
+                                className="w-full py-4 mt-6 text-white font-extrabold rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.01] shadow-xl disabled:bg-gray-400 disabled:shadow-none focus:ring-4 focus:ring-opacity-50"
+                                style={{ 
+                                    backgroundColor: submitting ? '#6B7280' : secondaryColor, 
+                                    '--tw-ring-color': secondaryColor // Inject ring color for focus
+                                }}
+                            >
+                                {submitting ? (
+                                    <span className="flex items-center justify-center">
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing Request...
+                                    </span>
+                                ) : 'Submit'}
+                            </button>
+                        </div>
                     </form>
+                    
+                    <p className="text-center text-xs text-gray-400 mt-6">
+                        By submitting, you consent to receive communication from us regarding your application.
+                    </p>
+
                 </div>
             </div>
-
-            {/* Custom Message Box */}
-            {message.text && (
-                <div
-                    className={`fixed bottom-4 left-1/2 -translate-x-1/2 p-4 rounded-lg shadow-lg max-w-sm text-white font-medium flex items-center space-x-2 transition-transform duration-300 animate-slideUp
-            ${message.type === "success" ? "bg-green-500" : "bg-red-500"}`}
-                    role="alert"
-                >
-                    {message.type === "success" ? <IconCheckCircle size={20} /> : <IconAlertTriangle size={20} />}
-                    <span>{message.text}</span>
-                </div>
-            )}
         </div>
     );
 }
 
-// Export the main component as default
 export default Home;
