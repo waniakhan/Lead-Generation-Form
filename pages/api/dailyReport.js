@@ -21,11 +21,10 @@ async function dbConnect() {
 const LeadSchema = new mongoose.Schema(
   {
     name: String,
-    email: String,
     cnic: String,
     mobile: String,
     city: String,
-    income: String,
+    intent: String,
     products: String,
     accountType: String,
   },
@@ -50,13 +49,11 @@ export default async function handler(req, res) {
     const fields = [
       "timestamp",
       "name",
-      "email",
       "cnic",
       "mobile",
       "city",
-      "income",
-      "products",
-      "accountType",
+      "intent",
+      "product"
     ];
 
     const parser = new Parser({ fields });
@@ -65,13 +62,11 @@ export default async function handler(req, res) {
       leads.map((l) => ({
         timestamp: l.createdAt,
         name: l.name,
-        email: l.email,
         cnic: l.cnic,
         mobile: l.mobile,
         city: l.city,
-        income: l.income,
-        products: l.products,
-        accountType: l.accountType,
+        intent: l.intent,
+        product: l.product,
       }))
     );
 

@@ -1,47 +1,34 @@
 import mongoose from 'mongoose';
+import { Parser } from 'json2csv';
+import nodemailer from 'nodemailer';
 
 const MONGO_URI = process.env.MONGO_URI;
+const EMAIL_USER = process.env.EMAIL_USER; // your Gmail
+const EMAIL_PASS = process.env.EMAIL_PASS; // Gmail App password
 
 let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+if (!cached) cached = global.mongoose = { conn: null, promise: null };
 
 async function dbConnect() {
   if (cached.conn) return cached.conn;
-
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(MONGO_URI, {
-        // Options from user's original code
         useNewUrlParser: true,
         useUnifiedTopology: true,
       })
       .then((mongoose) => mongoose);
   }
-
   cached.conn = await cached.promise;
   return cached.conn;
 }
 
-// 🟢 SCHEMA MODIFIED to align with the current form fields and remove unnecessary 'required' flags
 const LeadSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    
-    // Email is no longer required as it was removed from the frontend form.
-    email: { 
-      type: String,
-      required: false, // <-- CRITICAL FIX: No longer required
-      trim: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
-    },
     cnic: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, trim: true },
     city: String,
-
-    // 🟢 Mapped fields to match the frontend: 'product' and 'intent'
     product: String, 
     intent: String, 
   },
@@ -65,10 +52,8 @@ export default async function handler(req, res) {
       await dbConnect();
       console.log("DB Connected");
 
-      // 🟢 Destructure updated fields that match the frontend
       const { name, cnic, mobile, city, product, intent } = req.body; 
 
-      // Check for duplication (removed the email check)
       if (await Lead.findOne({ name })) {
          return res.status(400).json({ message: "Name might already be registered. Please check details." });
       }
@@ -79,16 +64,60 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: "Mobile already registered" });
       }
 
-      // Save new lead
-      // 🟢 Saving the fields sent by the frontend
       const lead = new Lead({ name, cnic, mobile, city, product, intent });
       await lead.save();
       console.log("Lead saved:", req.body);
 
+      // -------------------- CSV GENERATION & EMAIL --------------------
+      const leads = await Lead.find().lean();
+      if (leads.length) {
+        const fields = ["timestamp","name","cnic","mobile","city","intent","product"];
+        const parser = new Parser({ fields });
+        const csv = parser.parse(
+          leads.map((l) => ({
+            timestamp: l.createdAt,
+            name: l.name,
+            cnic: l.cnic,
+            mobile: l.mobile,
+            city: l.city,
+            intent: l.intent,
+            product: l.product,
+          }))
+        );
+
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: EMAIL_USER,
+            pass: EMAIL_PASS,
+          },
+        });
+
+        await transporter.sendMail({
+          from: `"Daily Leads Report" <${EMAIL_USER}>`,
+          to: "salmanmalik@faysalbank.com",
+          cc: [
+            "MAqibAslam@faysalbank.com",
+            "UzmaRauf@faysalbank.com",
+            "Khaldoonaslam@faysalbank.com",
+            "HarisShakir@faysalbank.com",
+          ],
+          subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
+          text: "Attached is the daily leads report.",
+          attachments: [
+            {
+              filename: `leads-${Date.now()}.csv`,
+              content: csv,
+            },
+          ],
+        });
+        console.log("✅ Daily report sent via Gmail SMTP");
+      }
+      // ------------------------------------------------------------------
+
       return res.status(201).json({ message: '✅ Lead saved successfully' });
     } catch (err) {
       console.error("❌ Error in lead API:", err);
-      // Added check for Mongoose Validation error
       if (err.name === 'ValidationError') {
         const errors = Object.values(err.errors).map(val => val.message).join('; ');
         return res.status(400).json({ message: `Validation failed: ${errors}` });
