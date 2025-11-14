@@ -1,23 +1,20 @@
 import mongoose from "mongoose";
 import { Parser } from "json2csv";
-import nodemailer from "nodemailer";
+import fetch from "node-fetch";
 
 const MONGO_URI = process.env.MONGO_URI;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+if (!cached) cached = global.mongoose = { conn: null, promise: null };
 
 async function dbConnect() {
   if (cached.conn) return cached.conn;
-
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+      .connect(MONGO_URI)
       .then((mongoose) => mongoose);
   }
-
   cached.conn = await cached.promise;
   return cached.conn;
 }
@@ -30,7 +27,7 @@ const LeadSchema = new mongoose.Schema({
   city: String,
   income: String,
   products: String,
-  accountType: String, // 👈 Added
+  accountType: String,
 }, { timestamps: true });
 
 const Lead = mongoose.models.Lead || mongoose.model("Lead", LeadSchema);
@@ -38,8 +35,8 @@ const Lead = mongoose.models.Lead || mongoose.model("Lead", LeadSchema);
 export default async function handler(req, res) {
   try {
     await dbConnect();
-
     const leads = await Lead.find().lean();
+
     if (!leads.length) {
       return res.status(200).json({ message: "⚠️ No leads found for report" });
     }
@@ -59,30 +56,35 @@ export default async function handler(req, res) {
         accountType: l.accountType,
       }))
     );
-    const transporter = nodemailer.createTransport({
-      host: "smtp.office365.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // ← naya app password
+
+    // --- Send email via Resend API ---
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
+      body: JSON.stringify({
+        from: "HWaniaKhan@outlook.com",
+        to: ["salmanmalik@faysalbank.com"],
+        cc: ["MAqibAslam@faysalbank.com", "UzmaRauf@faysalbank.com", "Khaldoonaslam@faysalbank.com", "HarisShakir@faysalbank.com"],
+        subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
+        text: "Attached is the daily leads report.",
+        attachments: [
+          {
+            name: `leads-${Date.now()}.csv`,
+            data: Buffer.from(csv).toString("base64"),
+          },
+        ],
+      }),
     });
 
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Resend API failed: ${errText}`);
+    }
 
-    await transporter.sendMail({
-      from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
-      to: "salmanmalik@faysalbank.com",          // jisko send karna hai
-      cc: ["MAqibAslam@faysalbank.com", "UzmaRauf@faysalbank.com", "Khaldoonaslam@faysalbank.com", "HarisShakir@faysalbank.com"],           // jitne add karna chaho
-      subject: `📊 Daily Leads Report - ${new Date().toLocaleDateString("en-GB")}`,
-      text: "Attached is the daily leads report.",
-      attachments: [
-        { filename: `leads-${Date.now()}.csv`, content: csv }
-      ]
-    });
-
-
-    res.status(200).json({ message: "✅ Daily report sent successfully" });
+    res.status(200).json({ message: "✅ Daily report sent successfully via Resend" });
   } catch (err) {
     console.error("❌ Error sending report:", err);
     res.status(500).json({ message: "Failed to send daily report", error: err.message });
