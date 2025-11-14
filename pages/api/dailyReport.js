@@ -64,10 +64,11 @@ export default async function handler(req, res) {
       port: 587,
       secure: false,
       auth: {
-        user: "HWaniaKhan@outlook.com",
-        pass: "ksvjegiclnxpinvn"
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS, // ← naya app password
       },
     });
+
 
     await transporter.sendMail({
       from: `"Daily Leads Report" <${process.env.EMAIL_USER}>`,
