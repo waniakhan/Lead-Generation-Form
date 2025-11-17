@@ -81,10 +81,10 @@ export default async function handler(req, res) {
 
     await transporter.sendMail({
       from: `"Daily Leads Report" <${EMAIL_USER}>`,
-      to: "salmanmalik@faysalbank.com",
+      to: "UzmaRauf@faysalbank.com",
       cc: [
         "MAqibAslam@faysalbank.com",
-        "UzmaRauf@faysalbank.com",
+        "salmanmalik@faysalbank.com",
         "Khaldoonaslam@faysalbank.com",
         "HarisShakir@faysalbank.com",
       ],

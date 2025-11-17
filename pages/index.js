@@ -44,7 +44,7 @@ function Home() {
         } catch (err) {
             console.error(err);
             // The error type in the UI will now use the corrected XCircle icon without errors
-            showMessage(`Submission Failed: ${err.message}`, "error"); 
+            showMessage(`Submission Failed: ${err.message}`, "error");
         } finally {
             setSubmitting(false);
         }
@@ -55,11 +55,11 @@ function Home() {
     const secondaryColor = '#009994'; // Teal/Cyan color used ONLY for the Submit button
 
     // Tailwind input class for reuse - Reduced vertical padding (p-3 -> py-2 px-3)
-    const inputClass = "mt-1 block w-full rounded-xl border-gray-300 shadow-inner py-2 px-3 transition-all duration-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-300 focus:outline-none"; 
-    
+    const inputClass = "mt-1 block w-full rounded-xl border-gray-300 shadow-inner py-2 px-3 transition-all duration-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-300 focus:outline-none";
+
     // Tailwind select class for reuse (for intent/product) - Reduced vertical padding (p-3 -> py-2 px-3)
     const selectClass = "mt-1 block w-full rounded-xl border-2 shadow-lg py-2 px-3 text-gray-700 transition-all duration-300 appearance-none bg-white cursor-pointer";
-    
+
     // Custom style for the select to show a dropdown arrow (using a lighter arrow)
     const selectStyle = {
         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 10l5 5 5-5H7z' fill='%239CA3AF'/%3e%3c/svg%3e")`,
@@ -88,18 +88,18 @@ function Home() {
     return (
         <div className="font-sans antialiased text-gray-800" style={{ fontFamily: 'Inter, sans-serif' }}>
             <script src="https://cdn.tailwindcss.com"></script>
-            
+
             <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
                 {/* Reduced container padding (p-8 -> p-6) */}
                 <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-3xl">
-                    
+
                     {/* Brand/Header Section - Reduced margin (mb-6 -> mb-4) */}
                     <div className="text-center mb-4">
                         {/* Logo reduced in size (w-64 h-24 -> w-52 h-20) */}
-                        <img className="mx-auto w-35 h-20 mb-3" 
-                             src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/vrjxgngilhvdzkwdxgr8" 
-                             alt="Brand Logo" 
-                             onError={(e) => (e.currentTarget.style.display = "none")} />
+                        <img className="mx-auto w-35 h-20 mb-3"
+                            src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/vrjxgngilhvdzkwdxgr8"
+                            alt="Brand Logo"
+                            onError={(e) => (e.currentTarget.style.display = "none")} />
                         {/* Header text size reduced (text-4xl -> text-3xl) */}
                         <h1 className="text-3xl font-extrabold mb-1" style={{ color: primaryColor }}>
                             Quick Application Form
@@ -121,11 +121,10 @@ function Home() {
 
                     {/* Submission Message - Reduced margin (mb-4 -> mb-3) */}
                     {message.text && (
-                        <div className={`p-3 mb-3 rounded-lg font-bold transition-opacity duration-500 flex items-center ${
-                            message.type === 'success' 
-                            ? 'bg-green-100 text-green-700 border border-green-300' 
+                        <div className={`p-3 mb-3 rounded-lg font-bold transition-opacity duration-500 flex items-center ${message.type === 'success'
+                            ? 'bg-green-100 text-green-700 border border-green-300'
                             : 'bg-red-100 text-red-700 border border-red-300'
-                        }`}>
+                            }`}>
                             {message.type === 'success' ? <CheckCircle /> : <XCircle />}
                             <span>{message.text}</span>
                         </div>
@@ -133,7 +132,7 @@ function Home() {
 
                     {/* Form - Reduced gap (gap-6 -> gap-4) */}
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
-                        
+
                         {/* Intent Dropdown */}
                         <div className="col-span-1 md:col-span-2">
                             <label htmlFor="intent" className="text-sm font-bold text-gray-700 mb-1 block">
@@ -145,7 +144,7 @@ function Home() {
                                 value={form.intent}
                                 onChange={onChange}
                                 className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
-                                style={selectStyle} 
+                                style={selectStyle}
                                 required
                             >
                                 <option value="" disabled>-- Select --</option>
@@ -153,7 +152,7 @@ function Home() {
                                 <option value="no">No</option>
                             </select>
                         </div>
-                        
+
                         {/* Personal Details Header - Reduced top padding and bottom margin */}
                         <div className="col-span-1 md:col-span-2 border-t border-gray-200 pt-3">
                             <h2 className="text-xl font-bold text-gray-800 mb-3">Personal Details</h2>
@@ -164,17 +163,47 @@ function Home() {
                             <label htmlFor="name" className="text-sm font-semibold text-gray-700 mb-1 block">Customer Name</label>
                             <input id="name" type="text" name="name" value={form.name} onChange={onChange} placeholder="John Doe" className={inputClass} required />
                         </div>
-                        
+
                         {/* Mobile Number Input */}
                         <div>
-                            <label htmlFor="mobile" className="text-sm font-semibold text-gray-700 mb-1 block">Mobile Number</label>
-                            <input id="mobile" type="tel" name="mobile" value={form.mobile} onChange={onChange} placeholder="03XXXXXXXXX" className={inputClass} required pattern="\d{11}" />
+                            <label htmlFor="mobile" className="text-sm font-semibold text-gray-700 mb-1 block">Mobile Number </label>
+                            <input
+                                id="mobile"
+                                type="tel"
+                                name="mobile"
+                                value={form.mobile}
+                                onChange={(e) => {
+                                    // Only allow digits & max 11
+                                    if (/^\d{0,11}$/.test(e.target.value)) {
+                                        onChange(e);
+                                    }
+                                }}
+                                placeholder="03XXXXXXXXX"
+                                className={inputClass}
+                                required
+                                maxLength="11"
+                            />
                         </div>
-                        
+
                         {/* CNIC Input */}
                         <div>
-                            <label htmlFor="cnic" className="text-sm font-semibold text-gray-700 mb-1 block">CNIC (13-digit)</label>
-                            <input id="cnic" type="text" name="cnic" value={form.cnic} onChange={onChange} placeholder="XXXXXXXXXXXXX" className={inputClass} required pattern="\d{13}" />
+                            <label htmlFor="cnic" className="text-sm font-semibold text-gray-700 mb-1 block">CNIC</label>
+                            <input
+                                id="cnic"
+                                type="text"
+                                name="cnic"
+                                value={form.cnic}
+                                onChange={(e) => {
+                                    // Only allow digits & max 13
+                                    if (/^\d{0,13}$/.test(e.target.value)) {
+                                        onChange(e);
+                                    }
+                                }}
+                                placeholder="XXXXXXXXXXXXX"
+                                className={inputClass}
+                                required
+                                maxLength="13"
+                            />
                         </div>
 
                         {/* City Input */}
@@ -182,22 +211,22 @@ function Home() {
                             <label htmlFor="city" className="text-sm font-semibold text-gray-700 mb-1 block">City</label>
                             <input id="city" type="text" name="city" value={form.city} onChange={onChange} placeholder="e.g. Karachi, Lahore" className={inputClass} required />
                         </div>
-                        
+
                         {/* Product Dropdown - Reduced top padding */}
                         {form.intent === "yes" && (
-                            <div 
+                            <div
                                 className="col-span-1 md:col-span-2 transition-all duration-500 ease-in-out border-t border-gray-200 pt-3"
                             >
                                 <label htmlFor="product" className="text-sm font-bold text-gray-700 mb-1 block">
                                     Product Selection (Check Minimum Salary Requirements)
                                 </label>
-                                <select 
-                                    id="product" 
-                                    name="product" 
-                                    value={form.product} 
-                                    onChange={onChange} 
+                                <select
+                                    id="product"
+                                    name="product"
+                                    value={form.product}
+                                    onChange={onChange}
                                     className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
-                                    style={selectStyle} 
+                                    style={selectStyle}
                                     required={form.intent === "yes"}
                                 >
                                     <option value="" disabled>-- Select a Product to Proceed --</option>
@@ -212,13 +241,13 @@ function Home() {
 
                         {/* Submit Button - Reduced vertical padding (py-4 -> py-3) and top margin (mt-6 -> mt-4) */}
                         <div className="col-span-1 md:col-span-2">
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 disabled={submitting}
                                 // Custom style for the submit button color
                                 className="w-full py-3 mt-4 text-white font-extrabold rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.01] shadow-xl disabled:bg-gray-400 disabled:shadow-none focus:ring-4 focus:ring-opacity-50"
-                                style={{ 
-                                    backgroundColor: submitting ? '#6B7280' : secondaryColor, 
+                                style={{
+                                    backgroundColor: submitting ? '#6B7280' : secondaryColor,
                                     '--tw-ring-color': secondaryColor // Inject ring color for focus
                                 }}
                             >
@@ -234,7 +263,7 @@ function Home() {
                             </button>
                         </div>
                     </form>
-                    
+
                     <p className="text-center text-xs text-gray-400 mt-6">
                         By submitting, you consent to receive communication from us regarding your application.
                     </p>
