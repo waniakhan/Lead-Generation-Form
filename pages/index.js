@@ -166,17 +166,14 @@ function Home() {
 
                         {/* Mobile Number Input */}
                         <div>
-                            <label htmlFor="mobile" className="text-sm font-semibold text-gray-700 mb-1 block">Mobile Number </label>
+                            <label htmlFor="mobile" className="text-sm font-semibold text-gray-700 mb-1 block">Mobile Number</label>
                             <input
                                 id="mobile"
                                 type="tel"
                                 name="mobile"
                                 value={form.mobile}
                                 onChange={(e) => {
-                                    // Only allow digits & max 11
-                                    if (/^\d{0,11}$/.test(e.target.value)) {
-                                        onChange(e);
-                                    }
+                                    if (/^\d{0,11}$/.test(e.target.value)) onChange(e);
                                 }}
                                 placeholder="03XXXXXXXXX"
                                 className={inputClass}
@@ -187,17 +184,14 @@ function Home() {
 
                         {/* CNIC Input */}
                         <div>
-                            <label htmlFor="cnic" className="text-sm font-semibold text-gray-700 mb-1 block">CNIC</label>
+                            <label htmlFor="cnic" className="text-sm font-semibold text-gray-700 mb-1 block">CNIC (13-digit)</label>
                             <input
                                 id="cnic"
                                 type="text"
                                 name="cnic"
                                 value={form.cnic}
                                 onChange={(e) => {
-                                    // Only allow digits & max 13
-                                    if (/^\d{0,13}$/.test(e.target.value)) {
-                                        onChange(e);
-                                    }
+                                    if (/^\d{0,13}$/.test(e.target.value)) onChange(e);
                                 }}
                                 placeholder="XXXXXXXXXXXXX"
                                 className={inputClass}

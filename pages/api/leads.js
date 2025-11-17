@@ -29,8 +29,8 @@ const LeadSchema = new mongoose.Schema(
     cnic: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, trim: true },
     city: String,
-    product: String, 
-    intent: String, 
+    product: String,
+    intent: String,
   },
   { timestamps: true }
 );
@@ -52,16 +52,16 @@ export default async function handler(req, res) {
       await dbConnect();
       console.log("DB Connected");
 
-      const { name, cnic, mobile, city, product, intent } = req.body; 
+      const { name, cnic, mobile, city, product, intent } = req.body;
 
       if (await Lead.findOne({ name })) {
-         return res.status(400).json({ message: "Name might already be registered. Please check details." });
+        return res.status(400).json({ message: "Name might already be registered. Please check details." });
       }
-      if (await Lead.findOne({ cnic })) {
-        return res.status(400).json({ message: "CNIC already registered" });
+      if (!/^\d{13}$/.test(cnic)) {
+        return res.status(400).json({ message: "CNIC must be exactly 13 digits." });
       }
-      if (await Lead.findOne({ mobile })) {
-        return res.status(400).json({ message: "Mobile already registered" });
+      if (!/^\d{11}$/.test(mobile)) {
+        return res.status(400).json({ message: "Mobile number must be exactly 11 digits." });
       }
 
       const lead = new Lead({ name, cnic, mobile, city, product, intent });
