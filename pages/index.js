@@ -30,8 +30,8 @@ function Home() {
         const payload = { timestamp: new Date().toISOString(), ...form };
 
         try {
-            // Note: I'm keeping your API call structure for functionality
-            const response = await fetch('https://my-form-app-beta.vercel.app/api/leads', {
+            // Use the local API route so Next.js handles the request in the same app.
+            const response = await fetch('/api/leads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -43,7 +43,6 @@ function Home() {
             setForm({ name: "", cnic: "", mobile: "", city: "", product: "", intent: "" });
         } catch (err) {
             console.error(err);
-            // The error type in the UI will now use the corrected XCircle icon without errors
             showMessage(`Submission Failed: ${err.message}`, "error");
         } finally {
             setSubmitting(false);
@@ -225,10 +224,11 @@ function Home() {
                                 >
                                     <option value="" disabled>-- Select a Product to Proceed --</option>
                                     <option value="Noor Card">💳 Noor Card (Min. Salary: PKR 40,000)</option>
-                                    <option value="Installment Personal Finance">💰 Installment Personal Finance (Min. Salary: PKR 50,000)</option>
+                                    <option value="Islamic Personal Finance">💰 Islamic Personal Finance (Min. Salary: PKR 50,000)</option>
                                     <option value="Takmeel Finance">💸 Takmeel Finance (Min. Salary: PKR 50,000)</option>
                                     <option value="Auto Finance">🚗 Auto Finance (Min. Salary: PKR 100,000)</option>
                                     <option value="Home Finance">🏠 Home Finance (Min. Salary: PKR 100,000)</option>
+                                    <option value="Noor Flexi Card">🏠 Noor Flexi Card (Min. Salary: PKR 100,000)</option>
                                 </select>
                             </div>
                         )}
