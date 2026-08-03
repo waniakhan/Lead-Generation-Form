@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function Home() {
     const [submitting, setSubmitting] = useState(false);
@@ -8,9 +8,10 @@ function Home() {
         mobile: "",
         city: "",
         product: "",
-        intent: "",
     });
     const [message, setMessage] = useState({ text: "", type: "" });
+
+    const [showPopup, setShowPopup] = useState(false);
 
     const onChange = (e) => {
         const { name, value } = e.target;
@@ -21,29 +22,69 @@ function Home() {
         setMessage({ text, type });
         setTimeout(() => setMessage({ text: "", type: "" }), 5500); // Slightly longer duration
     };
+    const [popupData, setPopupData] = useState({
+        show: false,
+        title: "",
+        message: "",
+        success: true
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
 
-        // Remove the 'email' field entirely since it's no longer in the state
-        const payload = { timestamp: new Date().toISOString(), ...form };
+        const payload = {
+            timestamp: new Date().toISOString(),
+            ...form
+        };
 
         try {
-            // Use the local API route so Next.js handles the request in the same app.
-            const response = await fetch('/api/leads', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const response = await fetch("/api/leads", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify(payload),
             });
+
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || "Failed to save lead. Please check your network.");
-            showMessage("Application Successful! We will contact you shortly.", "success");
-            // Clear form fields after success
-            setForm({ name: "", cnic: "", mobile: "", city: "", product: "", intent: "" });
+
+            if (!response.ok) {
+                setPopupData({
+                    show: true,
+                    title: "Unable to Submit",
+                    message: data.message,
+                    success: false,
+                });
+                return;
+            }
+
+            setPopupData({
+                show: true,
+                title: "Thank You!",
+                message:
+                    "Your interest has been submitted successfully. A Faysal Bank Consumer Finance representative will contact you shortly.",
+                success: true,
+            });
+
+            setForm({
+                name: "",
+                cnic: "",
+                mobile: "",
+                city: "",
+                product: "",
+            });
+
         } catch (err) {
-            console.error(err);
-            showMessage(`Submission Failed: ${err.message}`, "error");
+
+            setPopupData({
+                show: true,
+                title: "Something went wrong",
+                message:
+                    "Unable to process your request. Please try again later.",
+                success: false,
+            });
+
         } finally {
             setSubmitting(false);
         }
@@ -101,8 +142,11 @@ function Home() {
                             onError={(e) => (e.currentTarget.style.display = "none")} />
                         {/* Header text size reduced (text-4xl -> text-3xl) */}
                         <h1 className="text-3xl font-extrabold mb-1" style={{ color: primaryColor }}>
-                            Quick Application Form
+                            Consumer Finance Inquiry
                         </h1>
+                        <p className="text-gray-500 text-sm mt-2">
+                            Complete the form below to register your interest in Faysal Bank Consumer Finance products. Our representative will contact you shortly.
+                        </p>
                     </div>
 
                     {/* Important Note Alert - Reduced margin (mb-6 -> mb-4) */}
@@ -114,41 +158,37 @@ function Home() {
                             Customer Notice
                         </p>
                         <p className="text-sm mt-1 ml-7">
-                            If you are already using a <strong className="font-extrabold">Noor Card</strong>, kindly <strong className="font-extrabold">exit this form</strong> to explore the best deals available in Digi Mall.
+                            If you are an existing Faysal Bank <strong>Noor Card</strong> customer, kindly <strong>exit this form</strong> and explore exclusive offers available on DigiMall.
                         </p>
                     </div>
 
-                    {/* Submission Message - Reduced margin (mb-4 -> mb-3) */}
-                    {message.text && (
-                        <div className={`p-3 mb-3 rounded-lg font-bold transition-opacity duration-500 flex items-center ${message.type === 'success'
-                            ? 'bg-green-100 text-green-700 border border-green-300'
-                            : 'bg-red-100 text-red-700 border border-red-300'
-                            }`}>
-                            {message.type === 'success' ? <CheckCircle /> : <XCircle />}
-                            <span>{message.text}</span>
-                        </div>
-                    )}
-
                     {/* Form - Reduced gap (gap-6 -> gap-4) */}
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
-
-                        {/* Intent Dropdown */}
                         <div className="col-span-1 md:col-span-2">
-                            <label htmlFor="intent" className="text-sm font-bold text-gray-700 mb-1 block">
-                                Want to avail a consumer finance product?
+                            <label
+                                htmlFor="product"
+                                className="text-sm font-bold text-gray-700 mb-2 block"
+                            >
+                                Which Faysal Bank Consumer Finance Product are you interested in?
                             </label>
+
                             <select
-                                id="intent"
-                                name="intent"
-                                value={form.intent}
+                                id="product"
+                                name="product"
+                                value={form.product}
                                 onChange={onChange}
                                 className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
                                 style={selectStyle}
                                 required
                             >
-                                <option value="" disabled>-- Select --</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
+                                <option value="">Select a Product</option>
+                                <option value="Noor Card">💳 Noor Card (Minimum Salary: PKR 40,000)</option>
+                                <option value="Islamic Personal Finance">💰 Islamic Personal Finance (Minimum Salary: PKR 50,000)</option>
+                                <option value="Takmeel Finance">💸 Takmeel Finance (Minimum Salary: PKR 50,000)</option>
+                                <option value="Auto Finance">🚗 Auto Finance (Minimum Salary: PKR 100,000)</option>
+                                <option value="Home Finance">🏠 Home Finance (Minimum Salary: PKR 100,000)</option>
+                                <option value="Noor Flexi Card">🏠 Noor Flexi Card (Minimum Salary: PKR 100,000)</option>
+
                             </select>
                         </div>
 
@@ -206,32 +246,6 @@ function Home() {
                         </div>
 
                         {/* Product Dropdown - Reduced top padding */}
-                        {form.intent === "yes" && (
-                            <div
-                                className="col-span-1 md:col-span-2 transition-all duration-500 ease-in-out border-t border-gray-200 pt-3"
-                            >
-                                <label htmlFor="product" className="text-sm font-bold text-gray-700 mb-1 block">
-                                    Product Selection (Check Minimum Salary Requirements)
-                                </label>
-                                <select
-                                    id="product"
-                                    name="product"
-                                    value={form.product}
-                                    onChange={onChange}
-                                    className={`${selectClass} border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400`}
-                                    style={selectStyle}
-                                    required={form.intent === "yes"}
-                                >
-                                    <option value="" disabled>-- Select a Product to Proceed --</option>
-                                    <option value="Noor Card">💳 Noor Card (Min. Salary: PKR 40,000)</option>
-                                    <option value="Islamic Personal Finance">💰 Islamic Personal Finance (Min. Salary: PKR 50,000)</option>
-                                    <option value="Takmeel Finance">💸 Takmeel Finance (Min. Salary: PKR 50,000)</option>
-                                    <option value="Auto Finance">🚗 Auto Finance (Min. Salary: PKR 100,000)</option>
-                                    <option value="Home Finance">🏠 Home Finance (Min. Salary: PKR 100,000)</option>
-                                    <option value="Noor Flexi Card">🏠 Noor Flexi Card (Min. Salary: PKR 100,000)</option>
-                                </select>
-                            </div>
-                        )}
 
                         {/* Submit Button - Reduced vertical padding (py-4 -> py-3) and top margin (mt-6 -> mt-4) */}
                         <div className="col-span-1 md:col-span-2">
@@ -258,8 +272,81 @@ function Home() {
                         </div>
                     </form>
 
+                    {popupData.show && (
+                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+                            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-5 p-8 text-center">
+
+                                <div
+                                    className={`mx-auto mb-5 w-20 h-20 rounded-full flex items-center justify-center ${popupData.success ? "bg-green-100" : "bg-red-100"
+                                        }`}
+                                >
+                                    {popupData.success ? (
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="w-10 h-10 text-green-600"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M5 13l4 4L19 7"
+                                            />
+                                        </svg>
+                                    ) : (
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="w-10 h-10 text-red-600"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M6 18L18 6M6 6l12 12"
+                                            />
+                                        </svg>
+                                    )}
+                                </div>
+
+                                <h2
+                                    className="text-2xl font-bold mb-3"
+                                    style={{ color: popupData.success ? "#16a34a" : "#dc2626" }}
+                                >
+                                    {popupData.title}
+                                </h2>
+
+                                <p className="text-gray-600 leading-7">
+                                    {popupData.message}
+                                </p>
+
+                                <button
+                                    onClick={() =>
+                                        setPopupData({
+                                            show: false,
+                                            title: "",
+                                            message: "",
+                                            success: true,
+                                        })
+                                    }
+                                    className="mt-8 px-8 py-3 rounded-xl text-white font-semibold"
+                                    style={{ backgroundColor: secondaryColor }}
+                                >
+                                    Close
+                                </button>
+
+                            </div>
+
+                        </div>
+                    )}
+
                     <p className="text-center text-xs text-gray-400 mt-6">
-                        By submitting, you consent to receive communication from us regarding your application.
+                        By submitting this form, you consent to be contacted by Faysal Bank regarding Consumer Finance products and related offers.
                     </p>
 
                 </div>

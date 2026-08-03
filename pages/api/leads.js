@@ -50,13 +50,28 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       await dbConnect();
-      console.log("DB Connected");
-
       const { name, cnic, mobile, city, product, intent } = req.body;
+      const existing = await Lead.findOne({
+        $or: [
+          { cnic },
+          { mobile }
+        ]
+      });
 
-      if (await Lead.findOne({ name })) {
-        return res.status(400).json({ message: "Name might already be registered. Please check details." });
+      if (existing) {
+        if (existing.cnic === cnic) {
+          return res.status(400).json({
+            message: "This CNIC is already registered."
+          });
+        }
+
+        if (existing.mobile === mobile) {
+          return res.status(400).json({
+            message: "This mobile number is already registered."
+          });
+        }
       }
+
       if (!/^\d{13}$/.test(cnic)) {
         return res.status(400).json({ message: "CNIC must be exactly 13 digits." });
       }
@@ -66,7 +81,6 @@ export default async function handler(req, res) {
 
       const lead = new Lead({ name, cnic, mobile, city, product, intent });
       await lead.save();
-      console.log("Lead saved:", req.body);
 
       return res.status(201).json({ message: '✅ Lead saved successfully' });
     } catch (err) {
@@ -74,6 +88,31 @@ export default async function handler(req, res) {
       if (err.name === 'ValidationError') {
         const errors = Object.values(err.errors).map(val => val.message).join('; ');
         return res.status(400).json({ message: `Validation failed: ${errors}` });
+      }
+      // Duplicate key error
+      if (err.code === 11000) {
+        const field = Object.keys(err.keyPattern)[0];
+
+        let message = "This record already exists.";
+
+        switch (field) {
+          case "mobile":
+            message = "This mobile number is already registered.";
+            break;
+
+          case "cnic":
+            message = "This CNIC is already registered.";
+            break;
+
+          case "name":
+            message = "This customer name already exists.";
+            break;
+
+          default:
+            message = `${field} already exists.`;
+        }
+
+        return res.status(400).json({ message });
       }
       return res.status(500).json({ message: 'Failed to process lead due to internal server error.', error: err.message });
     }
