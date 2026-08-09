@@ -6,6 +6,8 @@ function Home() {
         name: "",
         cnic: "",
         mobile: "",
+        email: "",
+        age: "",
         city: "",
         product: "",
     });
@@ -33,9 +35,36 @@ function Home() {
         e.preventDefault();
         setSubmitting(true);
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const ageValue = Number(form.age);
+
+        if (!emailRegex.test((form.email || "").trim())) {
+            setPopupData({
+                show: true,
+                title: "Invalid Email",
+                message: "Please enter a valid email address.",
+                success: false,
+            });
+            setSubmitting(false);
+            return;
+        }
+
+        if (!Number.isInteger(ageValue) || ageValue < 21) {
+            setPopupData({
+                show: true,
+                title: "Age Requirement",
+                message: "Age must be 21 or above.",
+                success: false,
+            });
+            setSubmitting(false);
+            return;
+        }
+
         const payload = {
             timestamp: new Date().toISOString(),
-            ...form
+            ...form,
+            email: (form.email || "").trim(),
+            age: ageValue,
         };
 
         try {
@@ -71,6 +100,8 @@ function Home() {
                 name: "",
                 cnic: "",
                 mobile: "",
+                email: "",
+                age: "",
                 city: "",
                 product: "",
             });
@@ -182,12 +213,12 @@ function Home() {
                                 required
                             >
                                 <option value="">Select a Product</option>
-                                <option value="Noor Card">💳 Noor Card (Minimum Salary: PKR 40,000)</option>
-                                <option value="Islamic Personal Finance">💰 Islamic Personal Finance (Minimum Salary: PKR 50,000)</option>
-                                <option value="Takmeel Finance">💸 Takmeel Finance (Minimum Salary: PKR 50,000)</option>
-                                <option value="Auto Finance">🚗 Auto Finance (Minimum Salary: PKR 100,000)</option>
-                                <option value="Home Finance">🏠 Home Finance (Minimum Salary: PKR 100,000)</option>
-                                <option value="Noor Flexi Card">🏠 Noor Flexi Card (Minimum Salary: PKR 100,000)</option>
+                                <option value="Noor Card">Noor Card</option>
+                                <option value="Islamic Personal Finance"> Islamic Personal Finance</option>
+                                <option value="Takmeel Finance">Takmeel Finance</option>
+                                <option value="Auto Finance"> Auto Finance</option>
+                                <option value="Home Finance">Home Finance</option>
+                                <option value="Noor Flexi Card">Noor Flexi Card</option>
 
                             </select>
                         </div>
@@ -218,6 +249,39 @@ function Home() {
                                 className={inputClass}
                                 required
                                 maxLength="11"
+                            />
+                        </div>
+
+                        {/* Email Input */}
+                        <div>
+                            <label htmlFor="email" className="text-sm font-semibold text-gray-700 mb-1 block">Email Address</label>
+                            <input
+                                id="email"
+                                type="email"
+                                name="email"
+                                value={form.email}
+                                onChange={onChange}
+                                placeholder="you@example.com"
+                                className={inputClass}
+                                required
+                            />
+                        </div>
+
+                        {/* Age Input */}
+                        <div>
+                            <label htmlFor="age" className="text-sm font-semibold text-gray-700 mb-1 block">Age (21+)</label>
+                            <input
+                                id="age"
+                                type="number"
+                                name="age"
+                                value={form.age}
+                                onChange={(e) => {
+                                    if (/^\d{0,3}$/.test(e.target.value)) onChange(e);
+                                }}
+                                placeholder="21"
+                                className={inputClass}
+                                required
+                                min="21"
                             />
                         </div>
 

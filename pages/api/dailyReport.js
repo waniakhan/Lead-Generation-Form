@@ -23,6 +23,8 @@ const LeadSchema = new mongoose.Schema(
     name: String,
     cnic: String,
     mobile: String,
+    email: String,
+    age: Number,
     city: String,
     intent: String,
     products: String,
@@ -51,8 +53,9 @@ export default async function handler(req, res) {
       "name",
       "cnic",
       "mobile",
+      "email",
+      "age",
       "city",
-      "intent",
       "product"
     ];
 
@@ -64,8 +67,9 @@ export default async function handler(req, res) {
         name: l.name,
         cnic: l.cnic,
         mobile: l.mobile,
+        email: l.email,
+        age: l.age,
         city: l.city,
-        intent: l.intent,
         product: l.product,
       }))
     );

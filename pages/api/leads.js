@@ -28,6 +28,8 @@ const LeadSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     cnic: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true, lowercase: true },
+    age: { type: Number, required: true, min: 21 },
     city: String,
     product: String,
     intent: String,
@@ -50,7 +52,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       await dbConnect();
-      const { name, cnic, mobile, city, product, intent } = req.body;
+      const { name, cnic, mobile, email, age, city, product, intent } = req.body;
       const existing = await Lead.findOne({
         $or: [
           { cnic },
@@ -78,8 +80,16 @@ export default async function handler(req, res) {
       if (!/^\d{11}$/.test(mobile)) {
         return res.status(400).json({ message: "Mobile number must be exactly 11 digits." });
       }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim())) {
+        return res.status(400).json({ message: "Please enter a valid email address." });
+      }
 
-      const lead = new Lead({ name, cnic, mobile, city, product, intent });
+      const parsedAge = Number(age);
+      if (!Number.isInteger(parsedAge) || parsedAge < 21) {
+        return res.status(400).json({ message: "Age must be 21 or above." });
+      }
+
+      const lead = new Lead({ name, cnic, mobile, email: String(email).trim().toLowerCase(), age: parsedAge, city, product, intent });
       await lead.save();
 
       return res.status(201).json({ message: '✅ Lead saved successfully' });
