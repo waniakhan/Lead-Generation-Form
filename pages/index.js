@@ -173,7 +173,7 @@ function Home() {
                             onError={(e) => (e.currentTarget.style.display = "none")} />
                         {/* Header text size reduced (text-4xl -> text-3xl) */}
                         <h1 className="text-3xl font-extrabold mb-1" style={{ color: primaryColor }}>
-                            Consumer Finance Inquiry
+                            Consumer Finance
                         </h1>
                         <p className="text-gray-500 text-sm mt-2">
                             Complete the form below to register your interest in Faysal Bank Consumer Finance products. Our representative will contact you shortly.
@@ -231,7 +231,7 @@ function Home() {
                         {/* Name Input */}
                         <div>
                             <label htmlFor="name" className="text-sm font-semibold text-gray-700 mb-1 block">Customer Name</label>
-                            <input id="name" type="text" name="name" value={form.name} onChange={onChange} placeholder="John Doe" className={inputClass} required />
+                            <input id="name" type="text" name="name" value={form.name} onChange={onChange} placeholder="Your Name" className={inputClass} required />
                         </div>
 
                         {/* Mobile Number Input */}
